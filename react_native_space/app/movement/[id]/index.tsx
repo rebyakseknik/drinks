@@ -1,12 +1,13 @@
 import React, { useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert, Platform, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMovementsControllerFindOne, useMovementsControllerReverse } from '@/src/api/generated/api';
 import { Card } from '@/src/components/Card';
 import { LoadingScreen } from '@/src/components/LoadingScreen';
 import { GradientButton } from '@/src/components/GradientButton';
 import { COLORS, SPACING } from '@/src/utils/theme';
-import { formatDate, getMovementTypeLabel, getBaseUnitLabel } from '@/src/utils/format';
+import { getMovementTypeLabel, getBaseUnitLabel, formatQuantity, formatDateTime } from '@/src/utils/format';
 import { getErrorMessage } from '@/src/api/customFetch';
 
 export default function MovementDetailScreen() {
@@ -14,6 +15,7 @@ export default function MovementDetailScreen() {
   const router = useRouter();
   const doc = useMovementsControllerFindOne(id, { query: { enabled: !!id } });
   const reverseMut = useMovementsControllerReverse();
+  const queryClient = useQueryClient();
 
   useFocusEffect(useCallback(() => { doc.refetch(); }, []));
 
@@ -27,7 +29,7 @@ export default function MovementDetailScreen() {
     const doReverse = async () => {
       try {
         await reverseMut.mutateAsync({ id, data: {} });
-        doc.refetch();
+        await queryClient.invalidateQueries();
       } catch (e) {
         const msg = getErrorMessage(e, 'İptal edilemedi');
         if (Platform.OS === 'web') alert(msg);
@@ -49,28 +51,40 @@ export default function MovementDetailScreen() {
       <Card>
         <View style={s.row}>
           <View style={[s.badge, d.status === 'reversed' ? s.badgeRed : s.badgeGreen]}>
-            <Text style={s.badgeText}>{d.status === 'reversed' ? 'İptal Edildi' : 'Aktif'}</Text>
+            <Text style={s.badgeText}>{d.reversalOfId ? 'İptal Kaydı' : d.status === 'reversed' ? 'İptal Edildi' : 'Aktif'}</Text>
           </View>
           <View style={s.typeBadge}>
             <Text style={s.typeBadgeText}>{getMovementTypeLabel(d.type)}</Text>
           </View>
         </View>
-        <Text style={s.info}>Tarih: {formatDate(d.documentDate)}</Text>
+        <Text style={s.info}>Tarih: {formatDateTime(d.documentDate)}</Text>
         <Text style={s.info}>Oluşturan: {createdBy?.name ?? '-'}</Text>
         {d.notes && <Text style={s.info}>Not: {d.notes}</Text>}
+        {d.reversalOfId ? (
+          <Text style={s.muted}>Bu belge bir iptalin kaydıdır; stoğu etkilemez.</Text>
+        ) : d.status === 'reversed' ? (
+          <Text style={s.muted}>Bu belge iptal edildi; stoğa etkisi geri alındı.</Text>
+        ) : null}
       </Card>
 
       <Text style={s.sectionTitle}>Satırlar ({d.lines?.length ?? 0})</Text>
       {(d.lines ?? []).map((line) => (
         <Card key={line.id}>
           <Text style={s.lineName}>{line.productName}</Text>
-          <Text style={s.info}>{Math.abs(line.quantity)} {getBaseUnitLabel(line.packageName)}</Text>
-          <Text style={s.muted}>{line.packageQuantity} {line.packageName} × {line.conversionFactorUsed}</Text>
+          <Text style={s.info}>
+            {line.packageQuantity < 0 ? '−' : ''}{formatQuantity(Math.abs(line.packageQuantity))} {getBaseUnitLabel(line.packageName)}
+          </Text>
+          {line.conversionFactorUsed !== 1 && (
+            <Text style={s.muted}>
+              {formatQuantity(Math.abs(line.packageQuantity))} {line.packageName} × {line.conversionFactorUsed} = {formatQuantity(Math.abs(line.quantity))}
+            </Text>
+          )}
+          {line.notes && <Text style={s.info}>Girilen: {line.notes}</Text>}
           {line.reason && <Text style={s.info}>Sebep: {line.reason}</Text>}
         </Card>
       ))}
 
-      {d.status === 'active' && (
+      {d.status === 'active' && !d.reversalOfId && (
         <GradientButton title="İptal Et" onPress={handleReverse} loading={reverseMut.isPending} variant="danger" style={{ marginTop: SPACING.md }} />
       )}
     </ScrollView>
@@ -84,11 +98,11 @@ const s = StyleSheet.create({
   badge: { paddingHorizontal: SPACING.sm, paddingVertical: 3, borderRadius: 8 },
   badgeGreen: { backgroundColor: COLORS.success + '30' },
   badgeRed: { backgroundColor: COLORS.error + '30' },
-  badgeText: { color: COLORS.text, fontSize: 12, fontWeight: '600' },
+  badgeText: { color: COLORS.text, fontSize: 13, fontWeight: '600' },
   typeBadge: { backgroundColor: COLORS.primary + '30', paddingHorizontal: SPACING.sm, paddingVertical: 3, borderRadius: 8 },
-  typeBadgeText: { color: COLORS.primaryLight, fontSize: 12, fontWeight: '600' },
+  typeBadgeText: { color: COLORS.primaryLight, fontSize: 13, fontWeight: '600' },
   info: { color: COLORS.textSecondary, fontSize: 14, marginTop: 2 },
-  muted: { color: COLORS.textMuted, fontSize: 12 },
+  muted: { color: COLORS.textMuted, fontSize: 13 },
   sectionTitle: { color: COLORS.text, fontSize: 16, fontWeight: '700', marginTop: SPACING.lg, marginBottom: SPACING.sm },
   lineName: { color: COLORS.accent, fontSize: 15, fontWeight: '600' },
 });

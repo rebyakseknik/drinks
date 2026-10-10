@@ -1,21 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { configureApp } from './app.setup';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors({ origin: '*' });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  configureApp(app);
 
   const swaggerPath = 'api-docs';
 
@@ -46,6 +38,7 @@ async function bootstrap() {
     swaggerOptions: { layout: 'BaseLayout' },
   });
 
-  await app.listen(3000);
+  // Barındırma servisleri portu PORT değişkeniyle verir; yoksa 3000
+  await app.listen(Number(process.env.PORT) || 3000);
 }
 bootstrap();

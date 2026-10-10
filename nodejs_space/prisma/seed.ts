@@ -1,31 +1,22 @@
-import { PrismaClient, UserRole } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
 
+/**
+ * Başlangıç verisi: yalnızca işletme ayarları kaydını oluşturur.
+ * Hiçbir kaydı silmez veya değiştirmez; tekrar çalıştırmak güvenlidir.
+ * Kullanıcı hesabı oluşturmaz — ilk sahip hesabı uygulamadaki "Kayıt Ol" ile açılır.
+ */
 const prisma = new PrismaClient();
 
 async function main() {
-  // Hidden test account
-  const hashedPassword = await bcrypt.hash('D93akWu$g5', 10);
-  await prisma.user.upsert({
-    where: { email: 'abacus-2add5a5c@example.com' },
-    update: {},
-    create: {
-      email: 'abacus-2add5a5c@example.com',
-      password: hashedPassword,
-      name: 'Test Admin',
-      role: UserRole.owner,
-    },
-  });
-
-  // Ensure singleton business settings
   const existing = await prisma.businessSettings.findFirst();
   if (!existing) {
     await prisma.businessSettings.create({
       data: { name: 'Drinks', location: 'Forum Mersin' },
     });
+    console.log('İşletme ayarları oluşturuldu');
+  } else {
+    console.log('İşletme ayarları zaten mevcut, değişiklik yapılmadı');
   }
-
-  console.log('Seed completed');
 }
 
 main()

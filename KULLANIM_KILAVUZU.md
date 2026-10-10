@@ -101,18 +101,28 @@ Uygulamanın alt kısmında 5 ana sekme vardır:
    - **Kategori:** Örn. "İçecek", "Sıcak İçecek", "Gazlı İçecek"
    - **Temel Birim:** Adet, Gram veya Mililitre
    - **Minimum Stok Eşiği:** Bu sayının altına düşünce uyarı verilir
-4. **"Oluştur"** butonuna basın.
+4. **"Oluştur"** butonuna basın. Ardından başlangıç stoğu ekranı otomatik açılır.
 
-### Başlangıç Stoğu
-Her yeni ürün için depoda ne kadar olduğunu girmezseniz **"Başlangıç stoğu girilmedi"** uyarısı görünür. Stoku ayarlamak için:
-1. **Diğer → Yeni Hareket** menüsünden **"Mal Kabul"** veya **"Sayım Düzeltmesi"** seçin.
-2. İlgili ürünü ekleyin ve miktarı girin.
+### Başlangıç Stoğu (zorunlu ilk adım)
+Her yeni ürün için, depoda o an fiilen sayılan miktarı **bir kez** girmeniz gerekir. Girilmeyen ürünlerde **"Başlangıç stoğu girilmedi"** uyarısı görünür ve **o ürüne hiçbir hareket (mal kabul, sevkiyat vb.) girilemez.**
+
+1. **Stok** sekmesinde ürüne dokunun (yeni ürün oluşturunca bu ekran kendiliğinden açılır).
+2. **"Başlangıç Stoğu Gir"** butonuna basın.
+3. Depodaki miktarı yazın. Koli içeriği tanımlıysa koli ve adet birlikte girilebilir
+   (örn. 24'lük üründe **2 koli + 5 adet** → ekranda "53 adet" görünür). Gramla tutulan ürünlerde
+   **kg** ve **g**, mililitreyle tutulanlarda **L** ve **ml** alanları vardır.
+4. "Kaydedilecek" satırındaki toplamı kontrol edip **Kaydet**'e basın.
+
+⚠️ Başlangıç stoğunu **Mal Kabul ile girmeyin.** Başlangıç stoğu sonradan değiştirilemez; daha sonra çıkan farklar için **Sayım Düzeltmesi** kullanın.
 
 ### Paket Dönüşümleri
 Örneğin 1 koli = 24 adet gibi dönüşümler:
 1. Ürün detay ekranında **"Paket Dönüşümleri"** bölümüne gidin.
 2. Paket adı ("Koli"), dönüşüm faktörü ("24") girin.
-3. Hareket girerken "Koli" seçebilirsiniz — sistem otomatik çarpar.
+3. Hareket ve sayım ekranlarında ürün satırında **koli** ve **adet** kutuları birlikte çıkar; toplam altında gösterilir.
+4. Stok listesinde miktar koli karşılığıyla görünür: örn. **"15 koli · 360 adet"**. Koli içeriği tanımlı değilse yalnızca adet gösterilir.
+
+Not: Sonuç temel birimde tam sayı olmalıdır (0,5 adet veya yarım koli girilemez).
 
 ---
 
@@ -121,10 +131,10 @@ Her yeni ürün için depoda ne kadar olduğunu girmezseniz **"Başlangıç sto�
 **Stok** sekmesinde depo envanterinizi görürsünüz.
 
 ### Stok Listesi
-- Her ürünün adı, mevcut stoku ve birimi görünür.
-- **Kırmızı** gösterge: Stok, minimum eşiğin altında.
-- Üstteki arama kutusuna yazarak ürün arayabilirsiniz.
-- **"Düşük Stok"** filtresiyle sadece kritik ürünleri görebilirsiniz.
+- Her ürünün adı ve depodaki miktarı görünür: koli tanımlıysa **"15 koli · 360 adet"**, gramla tutulanlar **"2 kg"**, mililitreyle tutulanlar **"1,5 L"**.
+- **Turuncu** miktar: stok, minimum eşiğin altında.
+- Başlangıç sayımı yapılmamış ürünlerde miktar yerine **"—"** ve **"Başlangıç sayımı yok"** yazar; bu ürünler sıfır stok sayılmaz.
+- Filtreler: **Tümü**, **Kritik**, **Sayımı eksik**. Arama kutusuyla ürün arayabilirsiniz.
 
 ### Stok Nasıl Hesaplanır?
 Stok, tek tek hareketlerden toplanarak hesaplanır:
@@ -141,8 +151,8 @@ Stok, tek tek hareketlerden toplanarak hesaplanır:
 Beş tip hareket vardır. Her biri bir "belge" olarak kaydedilir.
 
 ### Yeni Hareket Oluşturma
-1. **Diğer → Yeni Hareket** menüsüne gidin (veya **Sevkiyat** sekmesinden "Yeni Sevkiyat" butonuna basın).
-2. **Hareket tipini** seçin:
+1. Ana ekrandaki **Mal Geldi** veya **Sevkiyat Yap** butonuna basın (tür önceden seçili gelir). İade ve fire için **Diğer → İade / Fire**.
+2. Gerekirse üstteki düğmelerden **hareket türünü** değiştirin:
 
 | Tip | Açıklama | Stok Etkisi |
 |-----|----------|-------------|
@@ -150,24 +160,44 @@ Beş tip hareket vardır. Her biri bir "belge" olarak kaydedilir.
 | **Sevkiyat** | Forum veya Doblo'ya gönderim | − Azaltır |
 | **Depoya İade** | Geri dönen ürünler | + Artırır |
 | **Fire / Hasar** | Kırılan, bozulan ürünler | − Azaltır |
-| **Sayım Düzeltmesi** | Fiziksel sayım farkı | +/− Düzeltir |
+| **Sayım Düzeltmesi** | Fiziksel sayım farkı | Ayrı ekran — aşağıya bakın |
 
-3. **Ürün ekleyin:** Listeden ürün seçin → satır eklenir.
-4. Her satırda:
-   - **Birim seçin:** Adet, Koli, vb.
-   - **Miktar girin:** Rakam klavyesiyle
-   - **Sayım Düzeltmesi** için: **Neden** yazmanız zorunludur.
-5. İsterseniz genel bir **not** ekleyin.
-6. **"Kaydet"** butonuna basın.
+3. **Ürün ekleyin:** "Ürün ara ve ekle…" kutusuna adının birkaç harfini yazıp dokunun.
+4. Her satırda depodaki miktar görünür; **koli / adet** (veya kg / g) kutularına miktarı yazın. Sayı klavyesi açılır.
+5. Sevkiyat ve fire depodakinden fazlaysa satır kırmızı olur ve örneğin
+   **"Yetersiz stok: depoda 16 adet, istenen 20 adet"** yazar; bu durumda kayıt yapılmaz.
+6. İsterseniz **not** ekleyin ve alttaki **Kaydet** butonuna basın (klavye açıkken de görünür).
+
+### Sayım Düzeltmesi
+Depoda sayım yaptığınızda farkı siz hesaplamazsınız; **bulduğunuz miktarı** girersiniz.
+
+1. **Diğer → Sayım Düzeltmesi** (veya ürün detayında **Sayım Yap**).
+2. Ürünü seçin ve **Sayımda bulunan miktar**ı girin.
+3. Ekranda özet görünür — örnek:
+   - Sistemdeki stok: 2 kg
+   - Sayımda bulunan: 1,85 kg
+   - Hesaplanan düzeltme: **−150 g**
+   - İşlem sonrası stok: 1,85 kg
+4. **Düzeltme nedeni**ni yazıp **Düzeltmeyi Kaydet**'e basın.
+
+Siz sayarken başka biri aynı ürüne işlem yaptıysa kayıt yapılmaz; ekranda
+**"Siz sayarken stok değişti"** uyarısı çıkar ve özet güncel stokla yeniden hesaplanır.
+Kontrol edip tekrar kaydedin.
 
 ### Tek Belgede Birden Fazla Ürün
 Bir belgede birden fazla ürün ekleyebilirsiniz. Örneğin mal kabul sırasında gelen 10 farklı ürünü tek seferde girebilirsiniz.
 
 ### Hareket İptali
-Kayıtlı bir hareketi silmek yerine **"İptal (Ters Kayıt)"** oluşturulur. Bu şekilde geçmiş kayıtlar korunur ve denetim izi bozulmaz.
+Kayıtlı bir hareketi silmek yerine hareket detayında **"İptal Et"** kullanılır. Belge "İptal edildi" olarak işaretlenir, stoğa etkisi tamamen geri alınır ve iz için bir "İptal kaydı" oluşturulur. İptal edilen sevkiyatlar raporlarda sayılmaz.
+
+- Bir belge yalnızca bir kez iptal edilebilir.
+- Gelen malın bir kısmı sevk edildiyse o mal kabul iptal edilemez (stok eksiye düşerdi). Bu durumda Sayım Düzeltmesi kullanın.
 
 ### Negatif Stok Koruması
-Sevkiyat veya fire girerken depodaki stoktan fazla miktar giremezsiniz. Sistem uyarı verir.
+Sevkiyat, fire veya eksi sayım düzeltmesi depodaki stoktan fazla olamaz. İki telefondan aynı anda giriş yapılsa bile stok eksiye düşmez.
+
+### Çift Kayıt Koruması
+"Kaydet"e bastıktan sonra bağlantı koparsa, aynı ekranda tekrar "Kaydet"e basmak güvenlidir: hareket ikinci kez kaydedilmez.
 
 ---
 
@@ -177,49 +207,51 @@ Her iş günü sonunda toplam nakit ve kart cirosunu kaydedin.
 
 ### Yeni Kapanış Girme
 1. **Ciro** sekmesine gidin.
-2. **"Günlük Kapanış"** veya **"+"** butonuna basın.
-3. Alanları doldurun:
+2. **"+"** butonuna basın (veya listede **"Kapanış girilmedi"** yazan güne dokunun).
+3. **İş Günü** varsayılan olarak bugündür; geçmiş bir günü girmek için ◀ okuyla geri gidin. İleri tarih seçilemez.
+4. Alanları doldurun:
    - **Nakit Ciro (₺):** Gün sonundaki net nakit satış tutarı
    - **Kart Ciro (₺):** Gün sonundaki net kart satış tutarı
    - **Not:** İsteğe bağlı açıklama
-4. **"Kaydet"** butonuna basın.
+5. **"Kaydet"** butonuna basın.
+
+Tutar yazarken "1.250,50" veya "1250,50" biçimini kullanabilirsiniz.
 
 ### Önemli Kurallar
 - **Toplam Ciro = Nakit + Kart.** Başka bir hesaplama yapılmaz.
 - Bu tutarlar **iadeler düşüldükten sonraki net rakamlardır**. İadeleri ayrıca girmenize gerek yok.
 - Kasa açılış parası, çekim, masraf gibi tutarları dahil etmeyin.
 - Her gün için **sadece bir kapanış** girilebilir. Aynı gün tekrar girmeye çalışırsanız hata alırsınız.
-- Kapanış girilmemiş günler **"Kapanış girilmedi"** olarak görünür, sıfır gösterilmez.
+- Kapanış girilmemiş günler **"Kapanış girilmedi"** olarak görünür, sıfır gösterilmez. Gerçekten sıfır ciro olan bir gün için **0** girin; listede "Sıfır ciro kaydı" olarak ayrı görünür.
 - Tutarlar Türk Lirası (₺) cinsinden, kuruş hassasiyetinde saklanır.
 
 ### Düzeltme
-Girilen bir kapanışı düzenleyebilirsiniz. Değişiklik denetim kaydına işlenir.
+Girilen bir kapanışı düzenleyebilirsiniz. Değişiklik denetim kaydına işlenir. İki kişi aynı kapanışı aynı anda düzeltirse ikincisine "Bu kayıt başka biri tarafından güncellendi" uyarısı çıkar; ekranı yenileyip tekrar deneyin.
 
 ---
 
-## 9. Özet Ekranı (Dashboard)
+## 9. Özet Ekranı (Ana Ekran)
 
-**Özet** sekmesi uygulamanın ana sayfasıdır. Burada şunları görürsünüz:
+**Özet** sekmesi uygulamanın ana sayfasıdır.
 
-### Bugünkü Ciro
-- Bugüne ait kapanış girildiyse nakit, kart ve toplam ciro gösterilir.
-- Girilmediyse **"Kapanış girilmedi"** uyarısı görünür.
+### Hızlı İşlemler
+En üstte üç büyük buton vardır: **Mal Geldi**, **Sevkiyat Yap**, **Ciro Gir**. Her biri doğrudan
+ilgili giriş ekranını açar; Mal Geldi ve Sevkiyat Yap'ta tür önceden seçilidir.
 
-### Aylık Ciro Özeti
-- Bu ayın toplam ciro tutarı (nakit + kart)
-- Kaç gün kapanış girildiği
+### Ciro
+- **Bugünkü ciro:** girildiyse tutar, girilmediyse **"Kapanış girilmedi"**. Sıfır ciro girilmiş gün
+  "Sıfır ciro olarak kaydedildi" diye ayrıca belirtilir.
+- **Bu ay:** toplam ve **kaç günün kaydedildiği**. Ayda hiç kayıt yoksa "0,00 ₺" yerine
+  **"Bu ay henüz ciro kaydı yok"** yazar.
+- Her iki gün de girilmişse geçen haftanın aynı günüyle karşılaştırma.
 
-### Geçen Hafta Karşılaştırması
-- Bugünle geçen haftanın aynı gününü karşılaştırır.
-- Örneğin bugün Çarşamba ise geçen Çarşamba'nın cirosuyla kıyaslar.
-- Her iki gün de girilmişse farkı gösterir.
+### Kritik Stoklar
+- Minimum eşiğin altındaki ürünler (koli/kg karşılığıyla).
+- Başlangıç sayımı yapılmamış ürün varsa **"X ürünün başlangıç sayımı yok"** uyarısı çıkar;
+  bu durumda "tüm stoklar yeterli" denmez.
 
-### Düşük Stok Uyarıları
-- Minimum eşiğin altındaki ürünler kırmızı olarak listelenir.
-- Dokunarak ürün detayına gidebilirsiniz.
-
-### Son Sevkiyatlar
-- En son 5 sevkiyat kaydı özetlenir.
+### Son Hareketler
+- Son 6 hareket (mal kabul, sevkiyat, sayım…). Dokunarak ayrıntısını görebilirsiniz.
 
 ### Ekranı Yenileme
 - Ekranı aşağı çekerek (pull-to-refresh) verileri güncelleyebilirsiniz.
@@ -244,8 +276,8 @@ Girilen bir kapanışı düzenleyebilirsiniz. Değişiklik denetim kaydına işl
 
 ### CSV Dışa Aktarma
 1. **Diğer → Dışa Aktar (CSV)** menüsüne gidin.
-2. Rapor tipini ve tarih aralığını seçin.
-3. **"Dışa Aktar"** butonuna basın.
+2. Rapor tipini ve ayı seçin.
+3. **"Dışa Aktar"** butonuna basın. Ciro dosyasında kapanış girilmeyen günler "Kapanış girilmedi" olarak yazılır.
 4. Oluşan CSV dosyasını telefonunuzun paylaşım menüsüyle:
    - WhatsApp'tan gönderebilirsiniz
    - E-posta ile paylaşabilirsiniz
@@ -263,8 +295,8 @@ Girilen bir kapanışı düzenleyebilirsiniz. Değişiklik denetim kaydına işl
 
 ### Kullanıcılar (Sadece Sahip)
 - Kayıtlı kullanıcıları görün.
-- Yönetici rolünü değiştirin.
-- Kullanıcı silin.
+- Yönetici rolünü değiştirin. Değişiklik o kişinin telefonunda hemen geçerli olur.
+- Kullanıcı silin. Silinen kişinin uygulaması otomatik olarak giriş ekranına döner.
 
 ### Davet Kodları (Sadece Sahip)
 - Yeni davet kodu oluşturun.
@@ -333,7 +365,7 @@ Sistemde birden fazla sahip olabilir ama ilk sahip, sisteme ilk kaydolan kişidi
 1. Sahip kaydı yap (davet kodu boş) ✓
 2. Ürünleri tanımla (Diğer → Ürünler → Yeni Ürün)
 3. Paket dönüşümlerini ayarla (koli = 24 adet vb.)
-4. Başlangıç stok sayımı gir (Yeni Hareket → Mal Kabul)
+4. Her ürün için başlangıç stoğunu gir (Ürün detayı → Başlangıç Stoğu Gir)
 5. Günlük işlemleri gir:
    → Mal geldiğinde: Mal Kabul
    → Forum/Doblo'ya gönderirken: Sevkiyat

@@ -1,16 +1,16 @@
-import { IsInt, IsOptional, IsString, IsDateString, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, IsDateString, Min, Max } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateClosingDto {
   @IsDateString() businessDate: string;
-  @IsInt() @Min(0) netCashKurus: number;
-  @IsInt() @Min(0) netCardKurus: number;
+  @IsInt() @Min(0) @Max(1_000_000_000) netCashKurus: number;
+  @IsInt() @Min(0) @Max(1_000_000_000) netCardKurus: number;
   @IsString() @IsOptional() notes?: string;
 }
 
 export class UpdateClosingDto {
-  @IsInt() @IsOptional() @Min(0) netCashKurus?: number;
-  @IsInt() @IsOptional() @Min(0) netCardKurus?: number;
+  @IsInt() @IsOptional() @Min(0) @Max(1_000_000_000) netCashKurus?: number;
+  @IsInt() @IsOptional() @Min(0) @Max(1_000_000_000) netCardKurus?: number;
   @IsString() @IsOptional() notes?: string;
   @IsInt() version: number;
 }

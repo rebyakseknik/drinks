@@ -1,22 +1,57 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString, IsArray, ValidateNested, IsNumber, IsInt, IsUUID, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsDateString,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  ValidateNested,
+  IsNumber,
+  IsInt,
+  IsUUID,
+  Min,
+  NotEquals,
+  MaxLength,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MovementLineInputDto {
   @IsUUID() productId: string;
-  @IsString() @IsNotEmpty() packageName: string;
-  @IsNumber() @Min(0.001) packageQuantity: number;
+  @IsString() @IsNotEmpty() @MaxLength(50) packageName: string;
+  /** Paket cinsinden miktar. Yalnızca sayım düzeltmesinde eksi olabilir (stok azaltma). */
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @NotEquals(0)
+  packageQuantity: number;
   @IsInt() @Min(1) conversionFactorUsed: number;
-  @IsString() @IsOptional() notes?: string;
-  @IsString() @IsOptional() reason?: string;
+  @IsString() @IsOptional() @MaxLength(500) notes?: string;
+  @IsString() @IsOptional() @MaxLength(500) reason?: string;
+  /**
+   * Sayım düzeltmesinde kullanıcının ekranda gördüğü sistem stoğu (temel birim).
+   * Gönderilirse ve kayıt anındaki stok farklıysa işlem yapılmaz (409, code: STOCK_CHANGED).
+   */
+  @IsInt() @IsOptional() expectedStock?: number;
 }
 
 export class CreateMovementDto {
   @IsUUID() idempotencyKey: string;
   @IsDateString() documentDate: string;
-  @IsEnum(['mal_kabul', 'sevkiyat', 'depoya_iade', 'fire_hasar', 'sayim_duzeltmesi']) type: string;
-  @IsString() @IsOptional() notes?: string;
-  @IsArray() @ValidateNested({ each: true }) @Type(() => MovementLineInputDto)
+  @IsEnum([
+    'mal_kabul',
+    'sevkiyat',
+    'depoya_iade',
+    'fire_hasar',
+    'sayim_duzeltmesi',
+  ])
+  type: string;
+  @IsString() @IsOptional() @MaxLength(1000) notes?: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(200)
+  @ValidateNested({ each: true })
+  @Type(() => MovementLineInputDto)
   lines: MovementLineInputDto[];
 }
 
@@ -48,18 +83,22 @@ export class MovementDocumentResponseDto {
   @ApiProperty({ nullable: true }) notes: string | null;
   @ApiProperty() status: string;
   @ApiProperty({ nullable: true }) reversalOfId: string | null;
-  @ApiProperty({ nullable: true, type: () => MovementLineCreatorDto }) createdBy: MovementLineCreatorDto | null;
+  @ApiProperty({ nullable: true, type: () => MovementLineCreatorDto })
+  createdBy: MovementLineCreatorDto | null;
   @ApiProperty() createdAt: Date;
-  @ApiProperty({ type: () => [MovementLineResponseDto] }) lines: MovementLineResponseDto[];
+  @ApiProperty({ type: () => [MovementLineResponseDto] })
+  lines: MovementLineResponseDto[];
 }
 
 export class MovementListResponseDto {
-  @ApiProperty({ type: () => [MovementDocumentResponseDto] }) items: MovementDocumentResponseDto[];
+  @ApiProperty({ type: () => [MovementDocumentResponseDto] })
+  items: MovementDocumentResponseDto[];
   @ApiProperty() total: number;
   @ApiProperty() page: number;
   @ApiProperty() totalPages: number;
 }
 
 export class ReverseMovementResponseDto {
-  @ApiProperty({ type: () => MovementDocumentResponseDto }) reversalDocument: MovementDocumentResponseDto;
+  @ApiProperty({ type: () => MovementDocumentResponseDto })
+  reversalDocument: MovementDocumentResponseDto;
 }

@@ -3,12 +3,24 @@
  * only to change auth scheme. Never edit anything under src/api/generated/
  * — orval overwrites it on every codegen run.
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 // Strip trailing slash — EXPO_PUBLIC_API_URL sometimes ships with one,
 // and "host//api/foo" trips NestJS routing.
-const BASE_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
-const TOKEN_KEY = process.env.EXPO_PUBLIC_AUTH_TOKEN_KEY ?? 'auth_token';
+export const BASE_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
+
+// Oturum anahtarı bellekte tutulur; kalıcı saklama AuthContext'te (telefonda şifreli depo).
+let authToken: string | null = null;
+let onUnauthorized: (() => void) | null = null;
+
+export function setAuthToken(token: string | null) {
+  authToken = token;
+}
+export function getAuthToken(): string | null {
+  return authToken;
+}
+/** Sunucu oturumu reddederse (ör. kullanıcı silindi) çağrılır: uygulama giriş ekranına döner. */
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
 
 export type ErrorType<Error> = Error;
 export type BodyType<BodyData> = BodyData;
@@ -83,7 +95,7 @@ export async function customFetch<T>(
   const fullUrl = url.startsWith('http')
     ? url
     : `${BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
-  const token = await AsyncStorage.getItem(TOKEN_KEY).catch(() => null);
+  const token = authToken;
   const headers: Record<string, string> = {
     Accept: 'application/json',
     ...((options.headers as Record<string, string> | undefined) ?? {}),
@@ -104,6 +116,7 @@ export async function customFetch<T>(
     }
     let body: unknown = raw;
     try { body = JSON.parse(raw); } catch { /* keep as text */ }
+    if (response.status === 401 && token) onUnauthorized?.();
     throw new ApiError(response.status, body);
   }
   if (response.status === 204 || response.status === 304) {
@@ -154,7 +167,7 @@ export function customFetchStream(
   let aborted = false;
 
   void (async () => {
-    const token = await AsyncStorage.getItem(TOKEN_KEY).catch(() => null);
+    const token = authToken;
     if (aborted) return;
     const request = new XMLHttpRequest();
     xhr = request;

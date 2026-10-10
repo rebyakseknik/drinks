@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SignupDto, LoginDto, ChangePasswordDto } from './dto/auth.dto';
 import { AuditService } from '../audit/audit.service';
 import { UserRole } from '@prisma/client';
-import { REAL_USER_FILTER } from './system-account';
+import { REAL_USER_FILTER, isLegacySystemEmail } from './legacy-accounts';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +20,9 @@ export class AuthService {
   }
 
   async signup(dto: SignupDto) {
+    dto.email = dto.email.trim().toLowerCase();
+    dto.name = dto.name.trim();
+    if (!dto.name) throw new BadRequestException('Ad Soyad boş olamaz');
     const existingUser = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existingUser) throw new ConflictException('Bu e-posta adresi zaten kayıtlı');
 
@@ -46,6 +49,8 @@ export class AuthService {
         throw new ForbiddenException('Kayıt olmak için davet kodu gereklidir');
       }
 
+      const exists = await tx.user.findUnique({ where: { email: dto.email } });
+      if (exists) throw new ConflictException('Bu e-posta adresi zaten kayıtlı');
       const user = await tx.user.create({
         data: { email: dto.email, password: hashedPassword, name: dto.name, role },
       });
@@ -72,8 +77,8 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException('Geçersiz e-posta veya şifre');
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email.trim().toLowerCase() } });
+    if (!user || isLegacySystemEmail(user.email)) throw new UnauthorizedException('Geçersiz e-posta veya şifre');
 
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Geçersiz e-posta veya şifre');

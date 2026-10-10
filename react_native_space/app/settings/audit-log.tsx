@@ -4,7 +4,7 @@ import { useAuditControllerFindAll } from '@/src/api/generated/api';
 import { COLORS, SPACING, RADIUS } from '@/src/utils/theme';
 import { LoadingScreen } from '@/src/components/LoadingScreen';
 import { EmptyState } from '@/src/components/EmptyState';
-import { formatDate } from '@/src/utils/format';
+import { formatDateTime } from '@/src/utils/format';
 import type { AuditLogItemDto } from '@/src/api/generated/schemas';
 
 const ACTION_LABELS: Record<string, string> = {
@@ -48,7 +48,7 @@ export default function AuditLogScreen() {
       </View>
       <Text style={s.actor}>{item?.actorName ?? 'Sistem'}</Text>
       {!!item?.details && <Text style={s.details}>{item?.details}</Text>}
-      <Text style={s.date}>{formatDate(item?.createdAt)}</Text>
+      <Text style={s.date}>{formatDateTime(item?.createdAt)}</Text>
     </View>
   );
 
@@ -82,6 +82,6 @@ const s = StyleSheet.create({
   action: { color: COLORS.primary, fontSize: 13, fontWeight: '700' },
   entity: { color: COLORS.accent, fontSize: 13, fontWeight: '600' },
   actor: { color: COLORS.textSecondary, fontSize: 13 },
-  details: { color: COLORS.textMuted, fontSize: 12, marginTop: 4 },
-  date: { color: COLORS.textMuted, fontSize: 11, marginTop: 6 },
+  details: { color: COLORS.textMuted, fontSize: 13, marginTop: 4 },
+  date: { color: COLORS.textMuted, fontSize: 13, marginTop: 6 },
 });

@@ -3,7 +3,7 @@ import { View, Text, TextInput, ScrollView, StyleSheet, KeyboardAvoidingView, Pl
 import { useRouter } from 'expo-router';
 import { useProductsControllerCreate } from '@/src/api/generated/api';
 import { GradientButton } from '@/src/components/GradientButton';
-import { COLORS, SPACING, RADIUS } from '@/src/utils/theme';
+import { COLORS, SPACING, RADIUS, PICKER_STYLE } from '@/src/utils/theme';
 import { getErrorMessage } from '@/src/api/customFetch';
 import { Picker } from '@react-native-picker/picker';
 
@@ -21,7 +21,8 @@ export default function NewProductScreen() {
     setError('');
     try {
       const result = await createMut.mutateAsync({ data: { name: name.trim(), category: category.trim(), baseUnit, minStockThreshold: parseInt(threshold) || 0 } });
-      router.replace(`/product/${result.id}`);
+      // Sonraki zorunlu adım: başlangıç stoğu
+      router.replace(`/product/${result.id}/initial-stock`);
     } catch (e) {
       setError(getErrorMessage(e, 'Oluşturulamadı'));
     }
@@ -63,5 +64,5 @@ const s = StyleSheet.create({
   label: { color: COLORS.textSecondary, fontSize: 14, marginBottom: SPACING.xs, marginTop: SPACING.md },
   input: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.surfaceBorder, borderRadius: RADIUS.md, color: COLORS.text, fontSize: 16, padding: SPACING.md, height: 48 },
   pickerWrap: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.surfaceBorder, borderRadius: RADIUS.md, overflow: 'hidden' },
-  picker: { color: COLORS.text, height: 48 },
+  picker: PICKER_STYLE,
 });

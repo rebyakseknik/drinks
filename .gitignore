@@ -1,8 +1,8 @@
 # Dependencies
 node_modules/
 .yarn/cache
-.yarn/install-state.gz
-.yarn/install-state.gz
+**/.yarn/install-state.gz
+**/.yarn/install-state.gz
 
 # Build output
 nodejs_space/dist/
@@ -55,3 +55,8 @@ nodejs_space/node_modules/.prisma/
 *.docx
 CLAUDE.pdf
 KULLANIM_KILAVUZU.pdf
+
+# Mac yerel önizleme (baslat.command)
+yerel-onizleme/.veri/
+yerel-onizleme/kayitlar/
+yerel-onizleme/package-lock.json

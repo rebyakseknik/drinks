@@ -1,4 +1,16 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import {
+  addDays,
+  closingDateValue,
+  istanbulDay,
+  parseBusinessDay,
+} from '../common/dates';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateClosingDto, UpdateClosingDto } from './dto/closing.dto';
@@ -19,32 +31,41 @@ export class ClosingsService {
       totalRevenueKurus: c.totalRevenueKurus,
       notes: c.notes ?? null,
       version: c.version,
-      createdBy: c.createdBy ? { id: c.createdBy.id, name: c.createdBy.name } : null,
-      updatedBy: c.updatedBy ? { id: c.updatedBy.id, name: c.updatedBy.name } : null,
+      createdBy: c.createdBy
+        ? { id: c.createdBy.id, name: c.createdBy.name }
+        : null,
+      updatedBy: c.updatedBy
+        ? { id: c.updatedBy.id, name: c.updatedBy.name }
+        : null,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
     };
   }
 
-  private getIstanbulStartOfDay(dateStr: string): Date {
-    // Parse date as Istanbul date and return start of that day in UTC
-    const d = new Date(dateStr);
-    // Set to start of day UTC
-    d.setUTCHours(0, 0, 0, 0);
-    return d;
-  }
-
-  async findAll(params: { from?: string; to?: string; page?: number; limit?: number }) {
+  async findAll(params: {
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const p = params.page ?? 1;
     const l = Math.min(params.limit ?? 31, 100);
     const skip = (p - 1) * l;
     const where: Record<string, unknown> = {};
 
     if (params.from || params.to) {
-      where.businessDate = {
-        ...(params.from ? { gte: new Date(params.from) } : {}),
-        ...(params.to ? { lte: new Date(params.to) } : {}),
-      };
+      try {
+        where.businessDate = {
+          ...(params.from
+            ? { gte: closingDateValue(parseBusinessDay(params.from)) }
+            : {}),
+          ...(params.to
+            ? { lte: closingDateValue(parseBusinessDay(params.to)) }
+            : {}),
+        };
+      } catch {
+        throw new BadRequestException('Geçersiz tarih');
+      }
     }
 
     const [items, total] = await Promise.all([
@@ -82,33 +103,56 @@ export class ClosingsService {
   }
 
   async create(dto: CreateClosingDto, userId: string) {
-    const businessDate = this.getIstanbulStartOfDay(dto.businessDate);
+    let day: string;
+    try {
+      day = parseBusinessDay(dto.businessDate);
+    } catch {
+      throw new BadRequestException('Geçersiz tarih');
+    }
+    if (day > istanbulDay())
+      throw new BadRequestException('İleri tarihli kapanış girilemez');
+    const businessDate = closingDateValue(day);
 
-    const existing = await this.prisma.dailyClosing.findUnique({ where: { businessDate } });
-    if (existing) throw new ConflictException('Bu tarih için zaten kapanış kaydı mevcut');
+    const existing = await this.prisma.dailyClosing.findUnique({
+      where: { businessDate },
+    });
+    if (existing)
+      throw new ConflictException('Bu tarih için zaten kapanış kaydı mevcut');
 
     const total = dto.netCashKurus + dto.netCardKurus;
-    const c = await this.prisma.dailyClosing.create({
-      data: {
-        businessDate,
-        netCashKurus: dto.netCashKurus,
-        netCardKurus: dto.netCardKurus,
-        totalRevenueKurus: total,
-        notes: dto.notes ?? null,
-        createdById: userId,
-      },
-      include: {
-        createdBy: { select: { id: true, name: true } },
-        updatedBy: { select: { id: true, name: true } },
-      },
-    });
+    let c;
+    try {
+      c = await this.prisma.dailyClosing.create({
+        data: {
+          businessDate,
+          netCashKurus: dto.netCashKurus,
+          netCardKurus: dto.netCardKurus,
+          totalRevenueKurus: total,
+          notes: dto.notes?.trim() || null,
+          createdById: userId,
+        },
+        include: {
+          createdBy: { select: { id: true, name: true } },
+          updatedBy: { select: { id: true, name: true } },
+        },
+      });
+    } catch (e) {
+      // Aynı gün için eşzamanlı ikinci kayıt
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new ConflictException('Bu tarih için zaten kapanış kaydı mevcut');
+      }
+      throw e;
+    }
 
     await this.auditService.log({
       action: 'closing_created',
       entityType: 'DailyClosing',
       entityId: c.id,
       actorId: userId,
-      details: { businessDate: dto.businessDate, total },
+      details: { businessDate: day, total },
     });
 
     return this.mapClosing(c);
@@ -118,23 +162,35 @@ export class ClosingsService {
     const c = await this.prisma.dailyClosing.findUnique({ where: { id } });
     if (!c) throw new NotFoundException('Kapanış kaydı bulunamadı');
     if (c.version !== dto.version) {
-      throw new ConflictException('Bu kayıt başka biri tarafından güncellendi. Lütfen yenileyin.');
+      throw new ConflictException(
+        'Bu kayıt başka biri tarafından güncellendi. Lütfen yenileyin.',
+      );
     }
 
     const netCash = dto.netCashKurus ?? c.netCashKurus;
     const netCard = dto.netCardKurus ?? c.netCardKurus;
     const total = netCash + netCard;
 
-    const updated = await this.prisma.dailyClosing.update({
-      where: { id },
+    // Sürüm kontrolü veritabanında yapılır: aynı sürümle gelen eşzamanlı iki
+    // düzeltmeden yalnızca biri kaydedilir, diğeri "başka biri güncelledi" hatası alır.
+    const result = await this.prisma.dailyClosing.updateMany({
+      where: { id, version: dto.version },
       data: {
         netCashKurus: netCash,
         netCardKurus: netCard,
         totalRevenueKurus: total,
-        notes: dto.notes !== undefined ? dto.notes : c.notes,
-        version: c.version + 1,
+        notes: dto.notes !== undefined ? dto.notes.trim() || null : c.notes,
+        version: { increment: 1 },
         updatedById: userId,
       },
+    });
+    if (result.count === 0) {
+      throw new ConflictException(
+        'Bu kayıt başka biri tarafından güncellendi. Lütfen yenileyin.',
+      );
+    }
+    const updated = await this.prisma.dailyClosing.findUniqueOrThrow({
+      where: { id },
       include: {
         createdBy: { select: { id: true, name: true } },
         updatedBy: { select: { id: true, name: true } },
@@ -153,11 +209,7 @@ export class ClosingsService {
   }
 
   async today() {
-    const now = new Date();
-    // Istanbul is UTC+3
-    const istanbulOffset = 3 * 60 * 60 * 1000;
-    const istanbulNow = new Date(now.getTime() + istanbulOffset);
-    const todayStart = new Date(Date.UTC(istanbulNow.getUTCFullYear(), istanbulNow.getUTCMonth(), istanbulNow.getUTCDate()));
+    const todayStart = closingDateValue(istanbulDay());
 
     const c = await this.prisma.dailyClosing.findUnique({
       where: { businessDate: todayStart },
@@ -171,11 +223,15 @@ export class ClosingsService {
   }
 
   async summary(date?: string) {
-    const now = new Date();
-    const istanbulOffset = 3 * 60 * 60 * 1000;
-    const istanbulNow = date ? new Date(date) : new Date(now.getTime() + istanbulOffset);
-    const year = istanbulNow.getUTCFullYear();
-    const month = istanbulNow.getUTCMonth();
+    let day: string;
+    try {
+      day = date ? parseBusinessDay(date) : istanbulDay();
+    } catch {
+      throw new BadRequestException('Geçersiz tarih');
+    }
+    const ref = closingDateValue(day);
+    const year = ref.getUTCFullYear();
+    const month = ref.getUTCMonth();
     const monthStart = new Date(Date.UTC(year, month, 1));
     const monthEnd = new Date(Date.UTC(year, month + 1, 0));
     const daysInMonth = monthEnd.getUTCDate();
@@ -199,27 +255,38 @@ export class ClosingsService {
   }
 
   async comparison() {
-    const now = new Date();
-    const istanbulOffset = 3 * 60 * 60 * 1000;
-    const istanbulNow = new Date(now.getTime() + istanbulOffset);
-    const todayStart = new Date(Date.UTC(istanbulNow.getUTCFullYear(), istanbulNow.getUTCMonth(), istanbulNow.getUTCDate()));
-    const lastWeekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const today = istanbulDay();
+    const todayStart = closingDateValue(today);
+    const lastWeekStart = closingDateValue(addDays(today, -7));
 
     const [todayClosing, lastWeekClosing] = await Promise.all([
-      this.prisma.dailyClosing.findUnique({ where: { businessDate: todayStart } }),
-      this.prisma.dailyClosing.findUnique({ where: { businessDate: lastWeekStart } }),
+      this.prisma.dailyClosing.findUnique({
+        where: { businessDate: todayStart },
+      }),
+      this.prisma.dailyClosing.findUnique({
+        where: { businessDate: lastWeekStart },
+      }),
     ]);
 
     const todayData = todayClosing
-      ? { date: todayClosing.businessDate, totalRevenueKurus: todayClosing.totalRevenueKurus }
+      ? {
+          date: todayClosing.businessDate,
+          totalRevenueKurus: todayClosing.totalRevenueKurus,
+        }
       : null;
     const lastWeekData = lastWeekClosing
-      ? { date: lastWeekClosing.businessDate, totalRevenueKurus: lastWeekClosing.totalRevenueKurus }
+      ? {
+          date: lastWeekClosing.businessDate,
+          totalRevenueKurus: lastWeekClosing.totalRevenueKurus,
+        }
       : null;
 
     let changePercent: number | null = null;
     if (todayData && lastWeekData && lastWeekData.totalRevenueKurus > 0) {
-      changePercent = ((todayData.totalRevenueKurus - lastWeekData.totalRevenueKurus) / lastWeekData.totalRevenueKurus) * 100;
+      changePercent =
+        ((todayData.totalRevenueKurus - lastWeekData.totalRevenueKurus) /
+          lastWeekData.totalRevenueKurus) *
+        100;
     }
 
     return { today: todayData, lastWeek: lastWeekData, changePercent };

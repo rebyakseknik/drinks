@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Delete, Param, Body, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Param, Body, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OwnerGuard } from '../auth/owner.guard';
@@ -6,7 +6,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { AuditService } from '../audit/audit.service';
 import { UpdateUserRoleDto, UserListResponseDto, UserRoleResponseDto, DeleteResponseDto } from './dto/user.dto';
 import { UserRole } from '@prisma/client';
-import { REAL_USER_FILTER } from '../auth/system-account';
+import { REAL_USER_FILTER } from '../auth/legacy-accounts';
 
 @Controller('api/users')
 @UseGuards(JwtAuthGuard, OwnerGuard)
@@ -37,6 +37,8 @@ export class UsersController {
     @CurrentUser() user: { id: string },
   ): Promise<UserRoleResponseDto> {
     if (id === user.id) throw new ForbiddenException('Kendi rol\u00fcn\u00fcz\u00fc de\u011fi\u015ftiremezsiniz');
+    const target = await this.prisma.user.findUnique({ where: { id } });
+    if (!target || REAL_USER_FILTER.email.notIn.includes(target.email)) throw new NotFoundException('Kullanıcı bulunamadı');
 
     const updated = await this.prisma.user.update({
       where: { id },
@@ -63,7 +65,8 @@ export class UsersController {
 
     // Check not last owner
     const target = await this.prisma.user.findUnique({ where: { id } });
-    if (target?.role === 'owner') {
+    if (!target) throw new NotFoundException('Kullanıcı bulunamadı');
+    if (target.role === 'owner') {
       const ownerCount = await this.prisma.user.count({ where: { role: 'owner', ...REAL_USER_FILTER } });
       if (ownerCount <= 1) throw new ForbiddenException('Son sahip silinemez');
     }

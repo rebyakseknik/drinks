@@ -44,7 +44,7 @@ export default function ClosingDetailScreen() {
     try {
       await updateMut.mutateAsync({
         id,
-        data: { netCashKurus: cashKurus, netCardKurus: cardKurus, notes: notes || undefined, version: c.version },
+        data: { netCashKurus: cashKurus, netCardKurus: cardKurus, notes: notes.trim(), version: c.version },
       });
       setEditing(false);
       closing.refetch();
@@ -64,10 +64,10 @@ export default function ClosingDetailScreen() {
         {!!error && <Text style={s.error}>{error}</Text>}
 
         <Text style={s.label}>Nakit (₺)</Text>
-        <TextInput style={s.input} value={cashText} onChangeText={setCashText} keyboardType="numeric" editable={editing} />
+        <TextInput style={s.input} value={cashText} onChangeText={setCashText} keyboardType="decimal-pad" editable={editing} />
 
         <Text style={s.label}>Kart (₺)</Text>
-        <TextInput style={s.input} value={cardText} onChangeText={setCardText} keyboardType="numeric" editable={editing} />
+        <TextInput style={s.input} value={cardText} onChangeText={setCardText} keyboardType="decimal-pad" editable={editing} />
 
         <View style={s.totalRow}>
           <Text style={s.totalLabel}>Toplam:</Text>

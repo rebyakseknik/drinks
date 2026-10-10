@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useReportsControllerDispatches } from '@/src/api/generated/api';
 import { Card } from '@/src/components/Card';
 import { COLORS, SPACING } from '@/src/utils/theme';
-import { formatDate, getBaseUnitLabel } from '@/src/utils/format';
+import { getBaseUnitLabel, formatDateTime } from '@/src/utils/format';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function DispatchReportScreen() {
@@ -20,7 +20,7 @@ export default function DispatchReportScreen() {
       ) : (
         items.map((item) => (
           <Card key={item.documentId}>
-            <Text style={s.date}>{formatDate(item.documentDate)} - {item.createdByName}</Text>
+            <Text style={s.date}>{formatDateTime(item.documentDate)} - {item.createdByName}</Text>
             {(item.lines ?? []).map((l, idx) => (
               <Text key={idx} style={s.line}>{l.productName}: {l.quantity} {getBaseUnitLabel(l.baseUnit)}</Text>
             ))}

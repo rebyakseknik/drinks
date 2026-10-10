@@ -3,7 +3,7 @@ import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from 'rea
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useMovementsControllerFindAll } from '@/src/api/generated/api';
 import { COLORS, SPACING, RADIUS } from '@/src/utils/theme';
-import { formatDate } from '@/src/utils/format';
+import { formatDateTime } from '@/src/utils/format';
 import { EmptyState } from '@/src/components/EmptyState';
 import { GradientButton } from '@/src/components/GradientButton';
 
@@ -30,14 +30,14 @@ export default function DispatchScreen() {
         renderItem={({ item }) => (
           <Pressable style={s.row} onPress={() => router.push(`/movement/${item.id}`)}>
             <View>
-              <Text style={s.date}>{formatDate(item.documentDate)}</Text>
+              <Text style={s.date}>{formatDateTime(item.documentDate)}</Text>
               <Text style={s.lineCount}>{item.lines?.length ?? 0} ürün</Text>
               <Text style={s.products} numberOfLines={1}>
                 {(item.lines ?? []).slice(0, 3).map((l) => l.productName).join(', ')}
               </Text>
             </View>
             <View style={[s.badge, item.status === 'reversed' ? s.badgeRed : s.badgeGreen]}>
-              <Text style={s.badgeText}>{item.status === 'reversed' ? 'İptal' : 'Aktif'}</Text>
+              <Text style={s.badgeText}>{item.reversalOfId ? 'İptal kaydı' : item.status === 'reversed' ? 'İptal edildi' : 'Aktif'}</Text>
             </View>
           </Pressable>
         )}
@@ -52,9 +52,9 @@ const s = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SPACING.md, paddingVertical: SPACING.md, borderBottomWidth: 0.5, borderBottomColor: COLORS.surfaceBorder },
   date: { color: COLORS.text, fontSize: 15, fontWeight: '600' },
   lineCount: { color: COLORS.textSecondary, fontSize: 13 },
-  products: { color: COLORS.textMuted, fontSize: 12, maxWidth: 220 },
+  products: { color: COLORS.textMuted, fontSize: 13, maxWidth: 220 },
   badge: { paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: RADIUS.sm },
   badgeGreen: { backgroundColor: COLORS.success + '30' },
   badgeRed: { backgroundColor: COLORS.error + '30' },
-  badgeText: { color: COLORS.text, fontSize: 11, fontWeight: '600' },
+  badgeText: { color: COLORS.text, fontSize: 13, fontWeight: '600' },
 });

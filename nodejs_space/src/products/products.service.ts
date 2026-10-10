@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { lockProducts } from '../common/stock';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateProductDto, UpdateProductDto, CreateConversionDto, UpdateConversionDto, SetInitialStockDto } from './dto/product.dto';
@@ -57,13 +58,14 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto, userId: string) {
-    const existing = await this.prisma.product.findFirst({ where: { name: dto.name } });
+    const name = dto.name.trim();
+    const existing = await this.prisma.product.findFirst({ where: { name: { equals: name, mode: 'insensitive' } } });
     if (existing) throw new ConflictException('Bu isimde bir ürün zaten mevcut');
 
     const product = await this.prisma.product.create({
       data: {
-        name: dto.name,
-        category: dto.category,
+        name,
+        category: dto.category.trim(),
         baseUnit: dto.baseUnit as 'adet' | 'gram' | 'mililitre',
         minStockThreshold: dto.minStockThreshold ?? 0,
         createdById: userId,
@@ -85,8 +87,12 @@ export class ProductsService {
     const product = await this.prisma.product.findUnique({ where: { id } });
     if (!product) throw new NotFoundException('Ürün bulunamadı');
 
+    if (dto.name !== undefined) dto.name = dto.name.trim();
+    if (dto.name === '') throw new BadRequestException('Ürün adı boş olamaz');
     if (dto.name && dto.name !== product.name) {
-      const existing = await this.prisma.product.findFirst({ where: { name: dto.name, id: { not: id } } });
+      const existing = await this.prisma.product.findFirst({
+        where: { name: { equals: dto.name, mode: 'insensitive' }, id: { not: id } },
+      });
       if (existing) throw new ConflictException('Bu isimde bir ürün zaten mevcut');
     }
 
@@ -125,11 +131,16 @@ export class ProductsService {
   async createConversion(productId: string, dto: CreateConversionDto, userId: string) {
     const product = await this.prisma.product.findUnique({ where: { id: productId } });
     if (!product) throw new NotFoundException('Ürün bulunamadı');
+    const packageName = dto.packageName.trim();
+    if (!packageName) throw new BadRequestException('Paket adı boş olamaz');
+    if (packageName.toLocaleLowerCase('tr') === product.baseUnit) {
+      throw new BadRequestException('Paket adı ürünün temel birimiyle aynı olamaz');
+    }
 
     const conversion = await this.prisma.packageConversion.create({
       data: {
         productId,
-        packageName: dto.packageName,
+        packageName,
         conversionFactor: dto.conversionFactor,
         effectiveFrom: new Date(dto.effectiveFrom),
       },
@@ -188,13 +199,28 @@ export class ProductsService {
   }
 
   async setInitialStock(productId: string, dto: SetInitialStockDto, userId: string) {
-    const product = await this.prisma.product.findUnique({ where: { id: productId } });
-    if (!product) throw new NotFoundException('Ürün bulunamadı');
-    if (product.initialCount !== null) throw new ConflictException('Başlangıç stoğu zaten girilmiş');
+    const date = new Date(dto.date);
+    if (isNaN(date.getTime())) throw new BadRequestException('Geçersiz tarih');
+    if (date.getTime() > Date.now() + 5 * 60 * 1000) {
+      throw new BadRequestException('Başlangıç sayımı ileri tarihli olamaz');
+    }
 
-    const updated = await this.prisma.product.update({
-      where: { id: productId },
-      data: { initialCount: dto.count, initialDate: new Date(dto.date) },
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await lockProducts(tx, [productId]);
+      const product = await tx.product.findUnique({ where: { id: productId } });
+      if (!product) throw new NotFoundException('Ürün bulunamadı');
+      if (product.initialCount !== null) throw new ConflictException('Başlangıç stoğu zaten girilmiş');
+      // Sayımdan önce girilmiş hareket varsa sayım onları çift sayar; bu durumda reddedilir.
+      const lineCount = await tx.movementLine.count({ where: { productId } });
+      if (lineCount > 0) {
+        throw new ConflictException(
+          'Bu ürüne daha önce hareket girilmiş. Başlangıç stoğu yerine Sayım Düzeltmesi kullanın.',
+        );
+      }
+      return tx.product.update({
+        where: { id: productId },
+        data: { initialCount: dto.count, initialDate: date },
+      });
     });
 
     await this.auditService.log({

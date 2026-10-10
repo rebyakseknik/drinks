@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, UseGuards, NotFoundException, ConflictException } from '@nestjs/common';
+import { randomInt } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OwnerGuard } from '../auth/owner.guard';
@@ -7,10 +8,11 @@ import { AuditService } from '../audit/audit.service';
 import { InviteListResponseDto, InviteCreatedResponseDto, InviteDeleteResponseDto } from './dto/invite.dto';
 
 function generateCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  // Karışabilecek karakterler (0/O, 1/I) çıkarıldı; güvenli rastgele üretim
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(randomInt(chars.length));
   }
   return code;
 }
@@ -67,6 +69,9 @@ export class InvitesController {
     @Param('id') id: string,
     @CurrentUser() user: { id: string },
   ): Promise<InviteDeleteResponseDto> {
+    const invite = await this.prisma.inviteCode.findUnique({ where: { id } });
+    if (!invite) throw new NotFoundException('Davet kodu bulunamadı');
+    if (invite.usedById) throw new ConflictException('Kullanılmış davet kodu silinemez');
     await this.prisma.inviteCode.update({
       where: { id },
       data: { isActive: false },
