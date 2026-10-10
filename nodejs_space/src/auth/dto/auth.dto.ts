@@ -1,15 +1,19 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+
+const normalizeEmail = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.trim().toLowerCase() : value;
 
 export class SignupDto {
-  @IsEmail() @IsNotEmpty() email: string;
+  @Transform(normalizeEmail) @IsEmail() @IsNotEmpty() email: string;
   @IsString() @IsNotEmpty() @MinLength(8) password: string;
   @IsString() @IsNotEmpty() name: string;
   @IsString() @IsOptional() inviteCode?: string;
 }
 
 export class LoginDto {
-  @IsEmail() @IsNotEmpty() email: string;
+  @Transform(normalizeEmail) @IsEmail() @IsNotEmpty() email: string;
   @IsString() @IsNotEmpty() password: string;
 }
 

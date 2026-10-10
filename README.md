@@ -90,8 +90,8 @@ drinks_yonetim/
 ### Backend (`nodejs_space/.env`)
 ```env
 DATABASE_URL=postgresql://user:pass@host:5432/dbname
-JWT_SECRET=<rastgele-uzun-değer>
-APP_ORIGIN=http://localhost:3000/     # veya production URL
+JWT_SECRET=<rastgele-uzun-değer>      # en az 32 karakter, kimseyle paylaşmayın
+PORT=3000                             # isteğe bağlı; barındırma servisi verir
 ```
 
 ### Frontend
@@ -101,6 +101,14 @@ EXPO_PUBLIC_API_URL=http://localhost:3000/
 ```
 
 ---
+
+## Mac'te Hızlı Deneme (tek tık)
+
+`baslat.command` dosyasına çift tıklayın (veya Terminal'de `bash baslat.command`).
+Mac'e PostgreSQL kurmadan proje klasöründe geçici bir veritabanı açar, sunucuyu başlatır ve
+iPhone'da Expo Go ile okutulacak QR kodu gösterir. Gereken tek şey Node.js (LTS).
+Veriler `yerel-onizleme/.veri` klasöründe kalır; sıfırlamak için `bash baslat.command --sifirla`.
+Bu yalnızca denemedir; canlı sisteme bağlanmaz.
 
 ## Yerel Geliştirme Kurulumu
 
@@ -120,11 +128,18 @@ yarn install
 yarn prisma generate
 yarn prisma db push
 
-# Seed (başlangıç verisi)
+# Seed (yalnızca işletme ayarlarını oluşturur, hiçbir kaydı silmez)
 yarn prisma db seed
 
 # Geliştirme sunucusu
 yarn run start:dev       # http://localhost:3000
+
+# Üretim
+yarn run build && yarn run start:prod
+
+# Otomatik testler — YALNIZCA adı "test" içeren ayrı bir veritabanında çalışır
+# (testler veritabanını sıfırlar; başka bir veritabanında kendini durdurur)
+DATABASE_URL=postgresql://.../drinks_test JWT_SECRET=... yarn test:e2e
 ```
 
 ### Frontend
@@ -197,7 +212,17 @@ Depo Stoğu = Başlangıç Sayımı
   +/- Σ(sayim_duzeltmesi satırları.quantity) [aktif belgeler]
 ```
 
-⚠️ "reversed" statüsündeki belgeler stok hesabına katılmaz.
+⚠️ "reversed" statüsündeki belgeler stok hesabına katılmaz. İptal edilen belge "reversed" olur;
+iz için oluşturulan ters kayıt belgesi de "reversed" durumundadır (`reversalOfId` dolu). Böylece
+iptal stoğu yalnızca bir kez etkiler. Raporlar yalnızca `status=active` ve `reversalOfId=null` belgeleri sayar.
+
+Kurallar (sunucuda zorunlu):
+- Başlangıç sayımı girilmemiş ürüne hareket girilemez; sayım tarihinden önceye hareket girilemez.
+- Paket katsayısı sunucuda ürünün tanımlı dönüşümüyle doğrulanır; temel birimde sonuç tam sayı olmalıdır.
+- Stok eksiye düşemez (sevkiyat, fire, eksi sayım düzeltmesi ve iptal dahil). Ürün satırları
+  `SELECT … FOR UPDATE` ile kilitlenir; eşzamanlı işlemler sırayla uygulanır.
+- Sayım düzeltmesinde `packageQuantity` eksi olabilir (stok azaltma); diğer tiplerde artı olmalıdır.
+- Günlük kapanış iş günü İstanbul takvimine göredir; ileri tarih kabul edilmez.
 
 ---
 
@@ -322,7 +347,7 @@ Alt Sekmeler (Bottom Tabs):
 ## Önemli İş Kuralları
 
 1. **Sevkiyat ≠ Satış.** Depodan çıkan ürün, müşteriye satıldı demek değildir.
-2. **Negatif stok engellenir.** Depoda olmayan ürün sevk edilemez.
+2. **Negatif stok engellenir.** Depoda olmayan ürün sevk edilemez; iptal ve eksi sayım da stoğu eksiye düşüremez.
 3. **Hareketler silinemez.** İptal için ters kayıt oluşturulur.
 4. **Gün başına tek kapanış.** Aynı tarihe ikinci kapanış oluşturulamaz.
 5. **Para kuruş (int) olarak saklanır.** 1234 = 12,34 ₺

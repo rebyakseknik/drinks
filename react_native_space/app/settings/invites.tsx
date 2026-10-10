@@ -7,7 +7,7 @@ import { EmptyState } from '@/src/components/EmptyState';
 import { GradientButton } from '@/src/components/GradientButton';
 import { Ionicons } from '@expo/vector-icons';
 import { getErrorMessage } from '@/src/api/customFetch';
-import { formatDate } from '@/src/utils/format';
+import { formatMoment } from '@/src/utils/format';
 import * as Clipboard from 'expo-clipboard';
 import type { InviteItemDto } from '@/src/api/generated/schemas';
 
@@ -91,7 +91,7 @@ export default function InvitesScreen() {
             <View style={[s.card, !active && s.cardInactive]}>
               <View style={s.cardInfo}>
                 <Text style={s.code}>{item?.code ?? ''}</Text>
-                <Text style={s.date}>Son Kullanma: {formatDate(item?.expiresAt)}</Text>
+                <Text style={s.date}>Son Kullanma: {formatMoment(item?.expiresAt)}</Text>
                 {used && (
                   <Text style={s.usedBy}>
                     Kullanan: {(item?.usedBy as any)?.name ?? 'Bilinmiyor'}
@@ -137,9 +137,9 @@ const s = StyleSheet.create({
   cardInactive: { opacity: 0.5 },
   cardInfo: { flex: 1 },
   code: { color: COLORS.accent, fontSize: 16, fontWeight: '700' },
-  date: { color: COLORS.textSecondary, fontSize: 12, marginTop: 4 },
-  usedBy: { color: COLORS.primary, fontSize: 12, marginTop: 2 },
-  expiredLabel: { color: COLORS.error, fontSize: 12, marginTop: 2 },
+  date: { color: COLORS.textSecondary, fontSize: 13, marginTop: 4 },
+  usedBy: { color: COLORS.primary, fontSize: 13, marginTop: 2 },
+  expiredLabel: { color: COLORS.error, fontSize: 13, marginTop: 2 },
   actions: { flexDirection: 'row', gap: SPACING.sm },
   actionBtn: { padding: SPACING.xs },
 });

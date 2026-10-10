@@ -1,7 +1,7 @@
 generator client {
     provider = "prisma-client-js"
+    // Abacus sunucusu linux-musl-arm64 kullanıyor; diğer ortamlarda "native" yeterli
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/drinks_yonetim/nodejs_space/node_modules/.prisma/client"
 }
 
 datasource db {

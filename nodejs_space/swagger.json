@@ -1913,21 +1913,28 @@
             "format": "uuid"
           },
           "packageName": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 50
           },
           "packageQuantity": {
             "type": "number",
-            "minimum": 0.001
+            "description": "Paket cinsinden miktar. Yalnızca sayım düzeltmesinde eksi olabilir (stok azaltma)."
           },
           "conversionFactorUsed": {
             "type": "number",
             "minimum": 1
           },
           "notes": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 500
           },
           "reason": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 500
+          },
+          "expectedStock": {
+            "type": "number",
+            "description": "Sayım düzeltmesinde kullanıcının ekranda gördüğü sistem stoğu (temel birim).\nGönderilirse ve kayıt anındaki stok farklıysa işlem yapılmaz (409, code: STOCK_CHANGED)."
           }
         },
         "required": [
@@ -1951,9 +1958,12 @@
             "type": "string"
           },
           "notes": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 1000
           },
           "lines": {
+            "minItems": 1,
+            "maxItems": 200,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MovementLineInputDto"
@@ -2012,6 +2022,15 @@
           },
           "hasInitialStock": {
             "type": "boolean"
+          },
+          "packageName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Ürünün koli/paket birimi (en büyük katsayılı güncel dönüşüm). Tanımlı değilse null."
+          },
+          "packageFactor": {
+            "type": "number",
+            "nullable": true
           }
         },
         "required": [
@@ -2022,7 +2041,9 @@
           "currentStock",
           "minStockThreshold",
           "isBelowThreshold",
-          "hasInitialStock"
+          "hasInitialStock",
+          "packageName",
+          "packageFactor"
         ]
       },
       "WarehouseStockListDto": {
@@ -2247,11 +2268,13 @@
           },
           "netCashKurus": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 1000000000
           },
           "netCardKurus": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 1000000000
           },
           "notes": {
             "type": "string"
@@ -2268,11 +2291,13 @@
         "properties": {
           "netCashKurus": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 1000000000
           },
           "netCardKurus": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 1000000000
           },
           "notes": {
             "type": "string"

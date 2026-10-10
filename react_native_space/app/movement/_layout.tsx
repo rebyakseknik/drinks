@@ -9,6 +9,7 @@ export default function MovementLayout() {
       headerTitleStyle: { fontWeight: '700' },
     }}>
       <Stack.Screen name="new" options={{ title: 'Yeni Hareket' }} />
+      <Stack.Screen name="count" options={{ title: 'Sayım Düzeltmesi' }} />
       <Stack.Screen name="history" options={{ title: 'Stok Hareketleri' }} />
       <Stack.Screen name="[id]/index" options={{ title: 'Hareket Detay' }} />
     </Stack>

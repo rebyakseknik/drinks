@@ -9,4 +9,11 @@ export interface WarehouseStockItemDto {
   minStockThreshold: number;
   isBelowThreshold: boolean;
   hasInitialStock: boolean;
+  /**
+     * Ürünün koli/paket birimi (en büyük katsayılı güncel dönüşüm). Tanımlı değilse null.
+     * @nullable
+     */
+  packageName: string | null;
+  /** @nullable */
+  packageFactor: number | null;
 }

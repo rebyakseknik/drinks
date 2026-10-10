@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useProductsControllerCreateConversion } from '@/src/api/generated/api';
 import { GradientButton } from '@/src/components/GradientButton';
 import { COLORS, SPACING, RADIUS } from '@/src/utils/theme';
@@ -9,6 +10,7 @@ import { getErrorMessage } from '@/src/api/customFetch';
 export default function ConversionScreen() {
   const { id = '' } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const createMut = useProductsControllerCreateConversion();
   const [packageName, setPackageName] = useState('');
   const [factor, setFactor] = useState('');
@@ -22,6 +24,7 @@ export default function ConversionScreen() {
         id,
         data: { packageName: packageName.trim(), conversionFactor: parseInt(factor), effectiveFrom: new Date().toISOString() },
       });
+      await queryClient.invalidateQueries();
       router.back();
     } catch (e) {
       setError(getErrorMessage(e, 'Kaydedilemedi'));

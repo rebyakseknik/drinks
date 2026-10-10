@@ -52,10 +52,16 @@ npx tsc --noEmit              # TypeScript kontrolü
 - **Yönlendirme:** expo-router dosya tabanlı. Her klasörde `_layout.tsx` gerekli.
 - **Auth akışı:** `AuthContext` üzerinden. Login/signup sonrası `router.push` YAPMAYIN — layout guard'lar (`<Redirect>`) otomatik yönlendirir.
 
-### Sistem Hesabı
-- `src/auth/system-account.ts` içinde tanımlı dahili test hesabı vardır.
-- Kullanıcı sayma işlemlerinde `REAL_USER_FILTER` ile dışlanır.
-- Bu hesabı kullanıcı arayüzünde göstermeyin.
+### Gizli hesap yok
+- Abacus'un eklediği gizli test hesabı koddan kaldırıldı; seed hiçbir kullanıcı oluşturmaz.
+- Eski veritabanlarında bu hesap kayıtlı olabilir: `src/auth/legacy-accounts.ts` onu giriş, oturum,
+  kullanıcı listesi ve "ilk kullanıcı sahip olur" sayımının dışında tutar.
+- Koda veya seed'e şifre içeren hesap EKLEMEYİN (depo herkese açık).
+
+### Stok kuralları
+- Stok hesabı ve kilitleme tek yerde: `src/common/stock.ts`. Yeni bir stok değiştiren işlem
+  eklerseniz transaction içinde önce `lockProducts`, sonra `currentStocks` kullanın.
+- Tarih işlemleri `src/common/dates.ts` üzerinden (İstanbul takvimi).
 
 ## Veri Kuralları (KRİTİK)
 
@@ -116,21 +122,16 @@ npx orval --config orval.config.ts
 
 ## Auth Akışı
 
-1. İlk kaydolan → otomatik **owner** (dahili test hesabı sayılmaz)
+1. İlk kaydolan → otomatik **owner**
 2. Sonrakiler → **invite code** gerekli (sahip oluşturur)
-3. JWT token → `expo-secure-store`'da saklanır
-4. Her API isteği → `Authorization: Bearer <token>` (customFetch ekler)
-5. Layout guard'lar: `auth/_layout.tsx` (isAuthenticated → tabs'e redirect), `tabs/_layout.tsx` (!isAuthenticated → login'e redirect)
+3. JWT token → telefonda yalnızca `expo-secure-store`'da (web'de AsyncStorage) saklanır, bellekte `setAuthToken` ile tutulur
+4. Her API isteği → `Authorization: Bearer <token>` (customFetch ekler). 401 gelirse otomatik çıkış yapılır.
+5. Sunucu her istekte kullanıcıyı veritabanından okur: silinen kullanıcı anında düşer, rol değişikliği hemen geçerli olur.
+6. Layout guard'lar: `auth/_layout.tsx` (isAuthenticated → tabs'e redirect), `tabs/_layout.tsx` (!isAuthenticated → login'e redirect)
 
 ## Test Senaryoları
 
-- [ ] İlk kullanıcı davet kodsuz kaydolabilmeli (sahip olur)
-- [ ] İkinci kullanıcı kodsuz reddedilmeli
-- [ ] Geçerli davet koduyla kayıt (yönetici olur)
-- [ ] Kullanılmış kod tekrar kullanılamaz
-- [ ] Negatif stoka düşürecek sevkiyat engellenmeli
-- [ ] Aynı güne iki kapanış oluşturulamaz
-- [ ] Yönetici kullanıcı yönetimine erişemez (403)
-- [ ] Optimistic locking: eş zamanlı kapanış düzenleme çarpışması
-- [ ] İdempotency key ile aynı hareket iki kez kaydedilmez
-- [ ] Paket dönüşümü doğru çalışır (1 koli = 24 adet)
+Sunucu: `nodejs_space/test/drinks.e2e-spec.ts` (47 test). Mobil miktar hesapları: `react_native_space/src/utils/__tests__` (`yarn test`, 13 test). Çalıştırma:
+`DATABASE_URL=<adı "test" içeren veritabanı> JWT_SECRET=... yarn test:e2e`
+Testler veritabanını sıfırlar; adı "test" içermeyen veritabanında kendini durdurur.
+Her iş kuralı değişikliğinde testleri çalıştırın ve yeni kural için test ekleyin.

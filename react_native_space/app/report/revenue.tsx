@@ -47,5 +47,5 @@ const s = StyleSheet.create({
   date: { color: COLORS.text, fontSize: 14 },
   right: { alignItems: 'flex-end' },
   amount: { color: COLORS.accent, fontSize: 16, fontWeight: '700' },
-  sub: { color: COLORS.textMuted, fontSize: 11 },
+  sub: { color: COLORS.textMuted, fontSize: 13 },
 });

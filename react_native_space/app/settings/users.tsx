@@ -110,7 +110,7 @@ const s = StyleSheet.create({
   cardInfo: { flex: 1 },
   name: { color: COLORS.text, fontSize: 15, fontWeight: '600' },
   email: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
-  role: { color: COLORS.textMuted, fontSize: 12, marginTop: 4, textTransform: 'uppercase', fontWeight: '700' },
+  role: { color: COLORS.textMuted, fontSize: 13, marginTop: 4, textTransform: 'uppercase', fontWeight: '700' },
   roleOwner: { color: COLORS.accent },
   actions: { flexDirection: 'row', gap: SPACING.sm },
   actionBtn: { padding: SPACING.xs },

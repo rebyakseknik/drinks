@@ -1,0 +1,9 @@
+{
+  "name": "drinks-yerel-onizleme",
+  "private": true,
+  "type": "module",
+  "description": "Mac'te yerel önizleme için gömülü PostgreSQL. Üretimde kullanılmaz.",
+  "dependencies": {
+    "embedded-postgres": "17.9.0-beta.17"
+  }
+}
