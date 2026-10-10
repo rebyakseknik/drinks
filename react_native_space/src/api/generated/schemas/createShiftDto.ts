@@ -1,0 +1,12 @@
+// @ts-nocheck
+
+export interface CreateShiftDto {
+  /** @minLength 1 */
+  staffId: string;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  businessDate: string;
+  startTime: string;
+  endTime: string;
+  /** @maxLength 200 */
+  notes?: string;
+}

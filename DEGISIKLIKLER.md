@@ -1,5 +1,19 @@
 # Değişiklikler
 
+## 3. Paket — Personel, vardiya ve gider (10 Ekim 2026)
+
+Abacus'ta eklenen Personel, Vardiyalar, Giderler ve Ürünler ekranları GitHub koduna alındı ve şu düzeltmeler yapıldı:
+
+- **Geçersiz tarih** (örn. 31 Şubat) artık hiçbir yerde başka bir güne kaydırılmıyor; reddediliyor.
+- **Çakışan vardiya** engellendi (gece yarısını geçenler dahil, düzenlemede de).
+- **Gider çift kaydı** engellendi (bağlantı koparsa tekrar denemek güvenli).
+- Gider özetinde **"Kalan kâr değildir"** notu; henüz gelmemiş günler "kapanışı yok" sayılmıyor.
+- **Yeni: Düzenlenebilir hazır vardiya saatleri** (Vardiya → Hazır Saatler → Düzenle). Tüm telefonlarda ortak.
+- **Yeni: Geçen haftayı kopyala.** Çakışanlar ve pasif personel atlanır; iki kez basmak çift kayıt oluşturmaz.
+- Veritabanı: yeni `shift_templates` tablosu ve giderlere isteğe bağlı `idempotencyKey` sütunu (mevcut veriye dokunmayan eklemeler).
+- Testler: sunucu 55, mobil 17.
+
+
 ## 2. Paket — Hızlı günlük kullanım (10 Ekim 2026)
 
 Mevcut veriler, yetkiler, hareket geçmişi ve çift kayıt koruması korunmuştur. Veritabanı yapısı değişmedi.

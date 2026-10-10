@@ -82,6 +82,9 @@ nodejs_space/src/
   closings/      → Günlük ciro kapanışı (optimistic locking)
   reports/       → Raporlar + CSV dışa aktarma
   invites/       → Davet kodu (8 hane, tek kullanım, 7 gün)
+  staff/         → Personel (pasif yapılır, silinmez)
+  shifts/        → Vardiyalar (çakışma kontrolü, haftayı kopyala) + hazır saatler (shift-templates)
+  expenses/      → Giderler (idempotencyKey ile çift kayıt koruması)
   users/         → Kullanıcı yönetimi (sadece sahip)
   audit/         → İşlem geçmişi
   settings/      → İşletme ayarları
@@ -131,7 +134,7 @@ npx orval --config orval.config.ts
 
 ## Test Senaryoları
 
-Sunucu: `nodejs_space/test/drinks.e2e-spec.ts` (47 test). Mobil miktar hesapları: `react_native_space/src/utils/__tests__` (`yarn test`, 13 test). Çalıştırma:
+Sunucu: `nodejs_space/test/drinks.e2e-spec.ts` (55 test). Mobil miktar hesapları: `react_native_space/src/utils/__tests__` (`yarn test`, 17 test). Çalıştırma:
 `DATABASE_URL=<adı "test" içeren veritabanı> JWT_SECRET=... yarn test:e2e`
 Testler veritabanını sıfırlar; adı "test" içermeyen veritabanında kendini durdurur.
 Her iş kuralı değişikliğinde testleri çalıştırın ve yeni kural için test ekleyin.

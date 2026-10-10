@@ -114,11 +114,16 @@ beforeAll(async () => {
   await app.init();
   prisma = app.get(PrismaService);
   await prisma.$executeRawUnsafe(
-    'TRUNCATE users, invite_codes, products, package_conversions, movement_documents, movement_lines, daily_closings, business_settings, audit_logs CASCADE',
+    'TRUNCATE users, invite_codes, products, package_conversions, movement_documents, movement_lines, daily_closings, business_settings, audit_logs, staff, shifts, expenses, shift_templates CASCADE',
   );
   // Abacus veritabanlarında bulunan eski gizli hesabı taklit et
   await prisma.user.create({
-    data: { email: 'abacus-2add5a5c@example.com', password: await bcrypt.hash('eski-sifre-123', 4), name: 'Test Admin', role: 'owner' },
+    data: {
+      email: 'abacus-2add5a5c@example.com',
+      password: await bcrypt.hash('eski-sifre-123', 4),
+      name: 'Test Admin',
+      role: 'owner',
+    },
   });
 });
 
@@ -128,7 +133,13 @@ afterAll(async () => {
 
 describe('Eski Abacus gizli hesabı', () => {
   it('bu hesapla giriş yapılamaz', async () => {
-    await http().post('/api/auth/login').send({ email: 'abacus-2add5a5c@example.com', password: 'eski-sifre-123' }).expect(401);
+    await http()
+      .post('/api/auth/login')
+      .send({
+        email: 'abacus-2add5a5c@example.com',
+        password: 'eski-sifre-123',
+      })
+      .expect(401);
   });
 });
 
@@ -145,8 +156,13 @@ describe('Kayıt ve yetkiler', () => {
     // Eski gizli hesap veritabanında olsa bile ilk gerçek kullanıcı Sahip olur
     expect(r.body.user.role).toBe('owner');
     expect(r.body.user.email).toBe('sahip@test.local');
-    const users = await http().get('/api/users').set(auth(r.body.token)).expect(200);
-    expect(users.body.items.map((u: { email: string }) => u.email)).toEqual(['sahip@test.local']);
+    const users = await http()
+      .get('/api/users')
+      .set(auth(r.body.token))
+      .expect(200);
+    expect(users.body.items.map((u: { email: string }) => u.email)).toEqual([
+      'sahip@test.local',
+    ]);
     OWNER = r.body.token;
   });
 
@@ -768,17 +784,278 @@ describe('Stok listesinde koli bilgisi', () => {
     await http()
       .post(`/api/products/${A}/conversions`)
       .set(auth(OWNER))
-      .send({ packageName: 'Koli', conversionFactor: 24, effectiveFrom: new Date(Date.now() - 1000).toISOString() })
+      .send({
+        packageName: 'Koli',
+        conversionFactor: 24,
+        effectiveFrom: new Date(Date.now() - 1000).toISOString(),
+      })
       .expect(201);
     await http()
       .post(`/api/products/${A}/conversions`)
       .set(auth(OWNER))
-      .send({ packageName: 'Paket', conversionFactor: 6, effectiveFrom: new Date(Date.now() - 1000).toISOString() })
+      .send({
+        packageName: 'Paket',
+        conversionFactor: 6,
+        effectiveFrom: new Date(Date.now() - 1000).toISOString(),
+      })
       .expect(201);
-    const r = await http().get('/api/warehouse-stock').set(auth(OWNER)).expect(200);
-    const a = r.body.items.find((i: { productId: string }) => i.productId === A);
-    const b = r.body.items.find((i: { productId: string }) => i.productId === B);
-    expect([a.packageName, a.packageFactor, a.currentStock]).toEqual(['Koli', 24, 360]);
+    const r = await http()
+      .get('/api/warehouse-stock')
+      .set(auth(OWNER))
+      .expect(200);
+    const a = r.body.items.find(
+      (i: { productId: string }) => i.productId === A,
+    );
+    const b = r.body.items.find(
+      (i: { productId: string }) => i.productId === B,
+    );
+    expect([a.packageName, a.packageFactor, a.currentStock]).toEqual([
+      'Koli',
+      24,
+      360,
+    ]);
     expect([b.packageName, b.packageFactor]).toEqual([null, null]);
+  });
+});
+
+describe('Personel, vardiya ve gider', () => {
+  let ali = '';
+  let ayse = '';
+  const today = istanbulDay();
+  const mon = (() => {
+    const d = new Date(`${today}T00:00:00Z`);
+    return addDays(today, -((d.getUTCDay() + 6) % 7));
+  })();
+  const lastMon = addDays(mon, -7);
+  const shift = (
+    staffId: string,
+    businessDate: string,
+    startTime: string,
+    endTime: string,
+  ) =>
+    http()
+      .post('/api/shifts')
+      .set(auth(OWNER))
+      .send({ staffId, businessDate, startTime, endTime });
+
+  let MANAGER2 = '';
+  beforeAll(async () => {
+    // Önceki bölümde yönetici silindiği için yeni bir yönetici açılır
+    const inv = await http().post('/api/invites').set(auth(OWNER)).expect(201);
+    MANAGER2 = (
+      await http()
+        .post('/api/signup')
+        .send({
+          name: 'Yönetici 2',
+          email: 'yon2@test.local',
+          password: 'Test12345',
+          inviteCode: inv.body.code,
+        })
+        .expect(201)
+    ).body.token;
+    ali = (
+      await http()
+        .post('/api/staff')
+        .set(auth(OWNER))
+        .send({ name: 'Ali' })
+        .expect(201)
+    ).body.id;
+    ayse = (
+      await http()
+        .post('/api/staff')
+        .set(auth(OWNER))
+        .send({ name: 'Ayşe' })
+        .expect(201)
+    ).body.id;
+  });
+
+  it('geçersiz takvim günü reddedilir (31 Şubat), başka güne kaymaz', async () => {
+    await shift(ali, '2026-02-31', '09:00', '17:00').expect(400);
+    await http()
+      .post('/api/expenses')
+      .set(auth(OWNER))
+      .send({ expenseDate: '2026-02-30', category: 'kira', amountKurus: 100 })
+      .expect(400);
+    await http()
+      .post('/api/closings')
+      .set(auth(OWNER))
+      .send({ businessDate: '2026-02-31', netCashKurus: 1, netCardKurus: 1 })
+      .expect(400);
+    await http()
+      .get('/api/shifts?from=2026-02-30&to=2026-03-05')
+      .set(auth(OWNER))
+      .expect(400);
+  });
+
+  it('aynı kişiye çakışan vardiya engellenir; gece vardiyası ertesi günle de karşılaştırılır', async () => {
+    await shift(ali, lastMon, '22:00', '06:00').expect(201);
+    const r = await shift(ali, lastMon, '23:00', '02:00');
+    expect(r.status).toBe(409);
+    expect(r.body.message).toMatch(/Ali/);
+    await shift(ali, addDays(lastMon, 1), '05:00', '08:00').expect(409); // ertesi sabah 06:00'ya kadar dolu
+    await shift(ali, addDays(lastMon, 1), '06:00', '10:00').expect(201); // tam bitişte başlamak serbest
+    await shift(ayse, lastMon, '23:00', '02:00').expect(201); // başka kişi serbest
+  });
+
+  it('vardiya düzenlenirken de çakışma kontrol edilir, kendisiyle çakışmaz', async () => {
+    const r = await shift(ayse, addDays(lastMon, 2), '10:00', '18:00').expect(
+      201,
+    );
+    await http()
+      .put(`/api/shifts/${r.body.id}`)
+      .set(auth(OWNER))
+      .send({ startTime: '09:00', endTime: '19:00' })
+      .expect(200);
+    await shift(ayse, addDays(lastMon, 2), '20:00', '23:00').expect(201);
+    await http()
+      .put(`/api/shifts/${r.body.id}`)
+      .set(auth(OWNER))
+      .send({ endTime: '21:00' })
+      .expect(409);
+  });
+
+  it('geçen haftayı kopyala: vardiyalar 7 gün ileri taşınır; ikinci kez basınca çift kayıt olmaz', async () => {
+    const before = await http()
+      .get(`/api/shifts?from=${lastMon}&to=${addDays(lastMon, 6)}`)
+      .set(auth(OWNER))
+      .expect(200);
+    const n = before.body.items.length;
+    expect(n).toBe(5);
+    const r1 = await http()
+      .post('/api/shifts/copy-week')
+      .set(auth(MANAGER2))
+      .send({ fromWeekStart: lastMon, toWeekStart: mon })
+      .expect(201);
+    expect(r1.body).toMatchObject({ created: n, skipped: 0 });
+    const after = await http()
+      .get(`/api/shifts?from=${mon}&to=${addDays(mon, 6)}`)
+      .set(auth(OWNER))
+      .expect(200);
+    expect(
+      after.body.items
+        .map(
+          (x: { businessDate: string; startTime: string }) =>
+            `${x.businessDate} ${x.startTime}`,
+        )
+        .sort(),
+    ).toEqual(
+      before.body.items
+        .map(
+          (x: { businessDate: string; startTime: string }) =>
+            `${addDays(x.businessDate, 7)} ${x.startTime}`,
+        )
+        .sort(),
+    );
+    const r2 = await http()
+      .post('/api/shifts/copy-week')
+      .set(auth(OWNER))
+      .send({ fromWeekStart: lastMon, toWeekStart: mon })
+      .expect(201);
+    expect(r2.body).toMatchObject({ created: 0, skipped: n });
+  });
+
+  it('pasif personelin vardiyası kopyalanmaz', async () => {
+    const bora = (
+      await http()
+        .post('/api/staff')
+        .set(auth(OWNER))
+        .send({ name: 'Bora' })
+        .expect(201)
+    ).body.id;
+    const src = addDays(mon, 14);
+    await shift(bora, src, '10:00', '18:00').expect(201);
+    await http()
+      .put(`/api/staff/${bora}`)
+      .set(auth(OWNER))
+      .send({ active: false })
+      .expect(200);
+    const r = await http()
+      .post('/api/shifts/copy-week')
+      .set(auth(OWNER))
+      .send({ fromWeekStart: src, toWeekStart: addDays(src, 7) })
+      .expect(201);
+    expect(r.body.created).toBe(0);
+    expect(r.body.skippedReasons[0]).toMatch(/pasif/);
+  });
+
+  it('hazır vardiya saatleri: varsayılanlar gelir, değiştirilebilir, silinen geri gelmez', async () => {
+    const l1 = await http()
+      .get('/api/shift-templates')
+      .set(auth(OWNER))
+      .expect(200);
+    expect(l1.body.items.map((t: { name: string }) => t.name)).toEqual([
+      'Sabah',
+      'Akşam',
+      'Tam gün',
+    ]);
+    const sabah = l1.body.items[0].id;
+    await http()
+      .put(`/api/shift-templates/${sabah}`)
+      .set(auth(MANAGER2))
+      .send({ startTime: '09:30', endTime: '17:30' })
+      .expect(200);
+    await http()
+      .put(`/api/shift-templates/${sabah}`)
+      .set(auth(OWNER))
+      .send({ startTime: '09:30', endTime: '09:30' })
+      .expect(400);
+    await http()
+      .post('/api/shift-templates')
+      .set(auth(OWNER))
+      .send({ name: 'Hafta sonu', startTime: '12:00', endTime: '23:00' })
+      .expect(201);
+    await http()
+      .delete(`/api/shift-templates/${l1.body.items[2].id}`)
+      .set(auth(OWNER))
+      .expect(200);
+    const l2 = await http()
+      .get('/api/shift-templates')
+      .set(auth(OWNER))
+      .expect(200);
+    expect(
+      l2.body.items.map(
+        (t: { name: string; startTime: string }) => `${t.name} ${t.startTime}`,
+      ),
+    ).toEqual(['Sabah 09:30', 'Akşam 16:00', 'Hafta sonu 12:00']);
+  });
+
+  it('aynı anahtarla gönderilen gider bir kez kaydedilir (eşzamanlı dahil)', async () => {
+    const key = randomUUID();
+    const body = {
+      expenseDate: today,
+      category: 'fatura',
+      amountKurus: 123450,
+      idempotencyKey: key,
+    };
+    const rs = await Promise.all([
+      http().post('/api/expenses').set(auth(OWNER)).send(body),
+      http().post('/api/expenses').set(auth(OWNER)).send(body),
+    ]);
+    expect(rs.map((r) => r.status)).toEqual([201, 201]);
+    expect(rs[0].body.id).toBe(rs[1].body.id);
+    const list = await http()
+      .get(`/api/expenses?from=${today}&to=${today}`)
+      .set(auth(OWNER))
+      .expect(200);
+    expect(
+      list.body.items.filter(
+        (e: { amountKurus: number }) => e.amountKurus === 123450,
+      ),
+    ).toHaveLength(1);
+  });
+
+  it('gider özeti: henüz gelmemiş günler "kapanışı yok" sayılmaz', async () => {
+    const t = new Date(`${today}T00:00:00Z`);
+    const monthStart = `${today.slice(0, 8)}01`;
+    const monthEnd = new Date(
+      Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0),
+    )
+      .toISOString()
+      .slice(0, 10);
+    const r = await http()
+      .get(`/api/expenses/summary?from=${monthStart}&to=${monthEnd}`)
+      .set(auth(OWNER))
+      .expect(200);
+    expect(r.body.daysInPeriod).toBe(Number(today.slice(8, 10)));
   });
 });
