@@ -1,0 +1,199 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/drinks_yonetim/nodejs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  owner
+  manager
+}
+
+enum BaseUnit {
+  adet
+  gram
+  mililitre
+}
+
+enum MovementType {
+  mal_kabul
+  sevkiyat
+  depoya_iade
+  fire_hasar
+  sayim_duzeltmesi
+}
+
+enum MovementStatus {
+  active
+  reversed
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(manager)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inviteCodesCreated InviteCode[]      @relation("CreatedInvites")
+  inviteCodeUsed     InviteCode?       @relation("UsedInvite")
+  productsCreated    Product[]
+  movementsCreated   MovementDocument[]
+  closingsCreated    DailyClosing[]    @relation("ClosingCreator")
+  closingsUpdated    DailyClosing[]    @relation("ClosingUpdater")
+  auditLogs          AuditLog[]
+
+  @@map("users")
+}
+
+model InviteCode {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  createdById String
+  createdBy   User      @relation("CreatedInvites", fields: [createdById], references: [id], onDelete: Cascade)
+  usedById    String?   @unique
+  usedBy      User?     @relation("UsedInvite", fields: [usedById], references: [id], onDelete: SetNull)
+  usedAt      DateTime?
+  expiresAt   DateTime
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  @@index([createdById])
+  @@index([isActive])
+  @@map("invite_codes")
+}
+
+model Product {
+  id                String   @id @default(uuid())
+  name              String
+  category          String
+  baseUnit          BaseUnit
+  active            Boolean  @default(true)
+  minStockThreshold Int      @default(0)
+  initialCount      Int?
+  initialDate       DateTime?
+  createdById       String?
+  createdBy         User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  conversions   PackageConversion[]
+  movementLines MovementLine[]
+
+  @@index([category])
+  @@index([active])
+  @@index([createdById])
+  @@map("products")
+}
+
+model PackageConversion {
+  id               String   @id @default(uuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  packageName      String
+  conversionFactor Int
+  effectiveFrom    DateTime
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([productId, packageName, effectiveFrom])
+  @@index([productId])
+  @@map("package_conversions")
+}
+
+model MovementDocument {
+  id             String         @id @default(uuid())
+  idempotencyKey String         @unique
+  documentDate   DateTime
+  type           MovementType
+  notes          String?
+  status         MovementStatus @default(active)
+  reversalOfId   String?   @unique
+  reversalOf     MovementDocument?  @relation("ReversalRelation", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversedBy     MovementDocument?  @relation("ReversalRelation")
+  createdById    String?
+  createdBy      User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt      DateTime       @default(now())
+
+  lines MovementLine[]
+
+  @@index([documentDate])
+  @@index([type])
+  @@index([status])
+  @@index([createdById])
+  @@index([reversalOfId])
+  @@map("movement_documents")
+}
+
+model MovementLine {
+  id                   String           @id @default(uuid())
+  documentId           String
+  document             MovementDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  productId            String
+  product              Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity             Int
+  packageName          String
+  packageQuantity      Float
+  conversionFactorUsed Int
+  notes                String?
+  reason               String?
+  createdAt            DateTime         @default(now())
+
+  @@index([documentId])
+  @@index([productId])
+  @@index([documentId, productId])
+  @@map("movement_lines")
+}
+
+model DailyClosing {
+  id               String   @id @default(uuid())
+  businessDate     DateTime @unique
+  netCashKurus     Int
+  netCardKurus     Int
+  totalRevenueKurus Int
+  notes            String?
+  version          Int      @default(1)
+  createdById      String?
+  createdBy        User?    @relation("ClosingCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById      String?
+  updatedBy        User?    @relation("ClosingUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([createdById])
+  @@map("daily_closings")
+}
+
+model BusinessSettings {
+  id        String   @id @default(uuid())
+  name      String   @default("Drinks")
+  location  String   @default("Forum Mersin")
+  updatedAt DateTime @updatedAt
+
+  @@map("business_settings")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

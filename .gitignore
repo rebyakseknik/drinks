@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.yarn/cache
+.yarn/install-state.gz
+.yarn/install-state.gz
+
+# Build output
+nodejs_space/dist/
+react_native_space/dist/
+react_native_space/.expo/
+react_native_space/web-build/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.logs/
+
+# Prisma
+nodejs_space/node_modules/.prisma/
+
+# Generated API client (regenerated via orval)
+# react_native_space/src/api/generated/
+# Uncomment above if you prefer to regenerate on each dev machine.
+# Keeping it committed ensures frontend compiles without running orval.
+
+# Platform-specific
+*.tgz
+*.tar.gz
+.project_instructions.md
+
+# Abacus AI platform files
+.abacus.donotdelete
+.easignore
+.abacusai/
+.web_app_reference/
+
+# Binary docs (keep .md versions only)
+*.docx
+CLAUDE.pdf
+KULLANIM_KILAVUZU.pdf
