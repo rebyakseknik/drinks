@@ -286,6 +286,31 @@ ilgili giriş ekranını açar; Mal Geldi ve Sevkiyat Yap'ta tür önceden seçi
 
 ---
 
+## 11a. Personel, Vardiyalar ve Giderler
+
+**Diğer → PERSONEL & GİDER** bölümünden erişilir. Sahip ve yöneticiler kullanabilir.
+
+### Personel
+- Ad, telefon ve ücret (günlük / haftalık / aylık) girilir.
+- Ayrılan personel silinmez, **pasif** yapılır; geçmiş vardiya ve giderleri korunur.
+
+### Vardiyalar
+- Ekran haftalık görünür; ok tuşlarıyla haftalar arasında gezilir. Üstte kişi başı gün ve saat toplamı vardır.
+- Bir güne vardiya eklemek için günün yanındaki **+**; mevcut vardiyayı değiştirmek veya silmek için vardiyaya dokunun.
+- **Hazır Saatler:** Vardiya girerken "Sabah 10–18" gibi düğmelerle saat tek dokunuşla doldurulur.
+  Bu düğmeleri değiştirmek için vardiya ekranında **Düzenle**'ye basın: saatleri değiştirebilir,
+  yeni hazır saat ekleyebilir veya silebilirsiniz. Değişiklik daha önce girilmiş vardiyaları etkilemez.
+- **Geçen haftayı kopyala:** Haftanın üstündeki düğme, bir önceki haftanın vardiyalarını bu haftaya aynı gün ve saatlerle kopyalar.
+  Aynı kişinin aynı saatte zaten vardiyası varsa o vardiya atlanır; bu yüzden düğmeye yanlışlıkla iki kez basmak çift kayıt oluşturmaz.
+  Pasif personelin vardiyaları kopyalanmaz.
+- Aynı kişiye çakışan vardiya girilemez (gece yarısını geçen vardiyalar da dahil); uygulama hangi vardiyayla çakıştığını gösterir.
+
+### Giderler
+- Gider türü (personel maaşı, kira, fatura, malzeme, diğer), tutar ve gün girilir. Maaş giderinde personel seçilir.
+- Ay özetinde **Ciro − Gider = Kalan** görünür. Ciro yalnızca girilmiş kasa kapanışlarından gelir; kapanışı olmayan günler ayrıca belirtilir.
+- ⚠️ **Kalan kâr değildir:** Tedarikçiden alınan mallar gider olarak girilmediyse kalan tutar gerçek kârdan yüksek görünür.
+- Bağlantı koparsa "Kaydet"e tekrar basmak güvenlidir; gider iki kez kaydedilmez.
+
 ## 11. Ayarlar ve Yönetim
 
 **Diğer** sekmesinin alt bölümlerinde:

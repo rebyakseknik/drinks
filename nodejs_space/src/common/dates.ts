@@ -9,9 +9,23 @@
 const ISTANBUL_TZ = 'Europe/Istanbul';
 const DAY_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
+/** 'YYYY-MM-DD' gerçek bir takvim günü mü? (2026-02-31 → false) */
+export function isValidDay(day: string): boolean {
+  if (!DAY_ONLY.test(day)) return false;
+  const d = new Date(`${day}T00:00:00.000Z`);
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === day;
+}
+
+/** Geçersiz günde RangeError fırlatır; denetleyiciler bunu 400'e çevirir. */
+export function assertDay(day: string): string {
+  if (!isValidDay(day)) throw new RangeError(`Geçersiz tarih: ${day}`);
+  return day;
+}
+
 /** Verilen anın İstanbul'daki takvim gününü 'YYYY-MM-DD' olarak döndürür. */
 export function istanbulDay(input: Date | string = new Date()): string {
-  if (typeof input === 'string' && DAY_ONLY.test(input)) return input;
+  if (typeof input === 'string' && DAY_ONLY.test(input))
+    return assertDay(input);
   const d = typeof input === 'string' ? new Date(input) : input;
   if (isNaN(d.getTime())) throw new Error('Geçersiz tarih');
   // en-CA biçimi YYYY-MM-DD üretir
@@ -29,13 +43,14 @@ export function istanbulDay(input: Date | string = new Date()): string {
  * "İstanbul gününün UTC gece yarısı" biçimi (…T00:00:00.000Z) de aynı güne düşer.
  */
 export function parseBusinessDay(input: string): string {
-  if (DAY_ONLY.test(input)) return input;
-  if (/T00:00:00(\.000)?Z$/.test(input)) return input.slice(0, 10);
+  if (DAY_ONLY.test(input)) return assertDay(input);
+  if (/T00:00:00(\.000)?Z$/.test(input)) return assertDay(input.slice(0, 10));
   return istanbulDay(input);
 }
 
 /** Kapanış kaydı için saklama değeri (UTC gece yarısı). */
 export function closingDateValue(day: string): Date {
+  assertDay(day);
   return new Date(`${day}T00:00:00.000Z`);
 }
 

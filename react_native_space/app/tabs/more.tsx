@@ -35,8 +35,14 @@ export default function MoreScreen() {
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
       <Text style={s.section}>ÜRÜN YÖNETİMİ</Text>
+      <MenuItem icon="list" label="Ürünler" onPress={() => router.push('/product')} />
       <MenuItem icon="pricetags" label="Yeni Ürün" onPress={() => router.push('/product/new')} />
       <MenuItem icon="cube" label="Stok Listesi" onPress={() => router.push('/tabs/stock')} />
+
+      <Text style={s.section}>PERSONEL & GİDER</Text>
+      <MenuItem icon="people-circle" label="Personel" onPress={() => router.push('/staff')} />
+      <MenuItem icon="calendar" label="Vardiyalar" onPress={() => router.push('/shift')} />
+      <MenuItem icon="wallet" label="Giderler" onPress={() => router.push('/expense')} />
 
       <Text style={s.section}>RAPORLAR</Text>
       <MenuItem icon="trending-up" label="Ciro Raporu" onPress={() => router.push('/report/revenue')} />

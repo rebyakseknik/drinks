@@ -28,6 +28,20 @@ enum MovementType {
   sayim_duzeltmesi
 }
 
+enum WagePeriod {
+  gunluk
+  haftalik
+  aylik
+}
+
+enum ExpenseCategory {
+  personel_maasi
+  kira
+  fatura
+  malzeme
+  diger
+}
+
 enum MovementStatus {
   active
   reversed
@@ -49,6 +63,8 @@ model User {
   closingsCreated    DailyClosing[]    @relation("ClosingCreator")
   closingsUpdated    DailyClosing[]    @relation("ClosingUpdater")
   auditLogs          AuditLog[]
+  shiftsCreated      Shift[]
+  expensesCreated    Expense[]
 
   @@map("users")
 }
@@ -196,4 +212,73 @@ model AuditLog {
   @@index([createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+model Staff {
+  id         String      @id @default(uuid())
+  name       String
+  phone      String?
+  wagePeriod WagePeriod  @default(haftalik)
+  wageKurus  Int?
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  shifts   Shift[]
+  expenses Expense[]
+
+  @@index([active])
+  @@map("staff")
+}
+
+/// Vardiya ekranındaki düzenlenebilir hazır saatler (örn. "Sabah 10–18")
+model ShiftTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  startTime String
+  endTime   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shift_templates")
+}
+
+model Shift {
+  id           String   @id @default(uuid())
+  staffId      String
+  staff        Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  businessDate DateTime
+  startTime    String
+  endTime      String
+  notes        String?
+  createdById  String?
+  createdBy    User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  @@index([businessDate])
+  @@index([staffId])
+  @@index([createdById])
+  @@map("shifts")
+}
+
+model Expense {
+  id          String          @id @default(uuid())
+  expenseDate DateTime
+  category    ExpenseCategory
+  amountKurus Int
+  staffId     String?
+  staff       Staff?          @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  description String?
+  createdById String?
+  createdBy   User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime        @default(now())
+  /// Çift kayıt koruması (isteğe bağlı)
+  idempotencyKey String?      @unique
+
+  @@index([expenseDate])
+  @@index([category])
+  @@index([staffId])
+  @@index([createdById])
+  @@map("expenses")
 }

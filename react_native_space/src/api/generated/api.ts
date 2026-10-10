@@ -33,12 +33,26 @@ import type {
   ClosingsControllerSummaryParams,
   ConversionListResponseDto,
   ConversionResponseDto,
+  CopyWeekDto,
+  CopyWeekResponseDto,
   CreateClosingDto,
   CreateConversionDto,
+  CreateExpenseDto,
   CreateMovementDto,
   CreateProductDto,
+  CreateShiftDto,
+  CreateShiftTemplateDto,
+  CreateStaffDto,
+  DeleteExpenseResponseDto,
   DeleteResponseDto,
+  DeleteShiftResponseDto,
+  DeleteShiftTemplateResponseDto,
   DispatchReportDto,
+  ExpenseListResponseDto,
+  ExpenseResponseDto,
+  ExpenseSummaryResponseDto,
+  ExpensesControllerFindAllParams,
+  ExpensesControllerSummaryParams,
   InitialStockResponseDto,
   InviteCreatedResponseDto,
   InviteDeleteResponseDto,
@@ -60,13 +74,24 @@ import type {
   ReverseMovementDto,
   ReverseMovementResponseDto,
   SetInitialStockDto,
+  ShiftListResponseDto,
+  ShiftResponseDto,
+  ShiftTemplateListResponseDto,
+  ShiftTemplateResponseDto,
+  ShiftsControllerFindAllParams,
   SignupDto,
+  StaffControllerFindAllParams,
+  StaffListResponseDto,
+  StaffResponseDto,
   TodayClosingResponseDto,
   TopDispatchedReportDto,
   UpdateBusinessSettingsDto,
   UpdateClosingDto,
   UpdateConversionDto,
   UpdateProductDto,
+  UpdateShiftDto,
+  UpdateShiftTemplateDto,
+  UpdateStaffDto,
   UpdateUserRoleDto,
   UserListResponseDto,
   UserRoleResponseDto,
@@ -3147,5 +3172,1316 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getInvitesControllerRemoveMutationOptions(options), queryClient);
+    }
+
+export const getStaffControllerFindAllUrl = (params?: StaffControllerFindAllParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/staff?${stringifiedParams}` : `/api/staff`
+}
+
+export const staffControllerFindAll = async (params?: StaffControllerFindAllParams, options?: RequestInit): Promise<StaffListResponseDto> => {
+
+  return customFetch<StaffListResponseDto>(getStaffControllerFindAllUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStaffControllerFindAllQueryKey = (params?: StaffControllerFindAllParams,) => {
+    return [
+    `/api/staff`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getStaffControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof staffControllerFindAll>>, TError = ErrorType<unknown>>(params?: StaffControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStaffControllerFindAllQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof staffControllerFindAll>>> = ({ signal }) => staffControllerFindAll(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StaffControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof staffControllerFindAll>>>
+export type StaffControllerFindAllQueryError = ErrorType<unknown>
+
+
+export function useStaffControllerFindAll<TData = Awaited<ReturnType<typeof staffControllerFindAll>>, TError = ErrorType<unknown>>(
+ params: undefined |  StaffControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof staffControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof staffControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStaffControllerFindAll<TData = Awaited<ReturnType<typeof staffControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: StaffControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof staffControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof staffControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStaffControllerFindAll<TData = Awaited<ReturnType<typeof staffControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: StaffControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useStaffControllerFindAll<TData = Awaited<ReturnType<typeof staffControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: StaffControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStaffControllerFindAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getStaffControllerCreateUrl = () => {
+
+
+
+
+  return `/api/staff`
+}
+
+export const staffControllerCreate = async (createStaffDto: CreateStaffDto, options?: RequestInit): Promise<StaffResponseDto> => {
+
+  return customFetch<StaffResponseDto>(getStaffControllerCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createStaffDto)
+  }
+);}
+
+
+
+
+export const getStaffControllerCreateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof staffControllerCreate>>, TError,{data: BodyType<CreateStaffDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof staffControllerCreate>>, TError,{data: BodyType<CreateStaffDto>}, TContext> => {
+
+const mutationKey = ['staffControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof staffControllerCreate>>, {data: BodyType<CreateStaffDto>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  staffControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StaffControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof staffControllerCreate>>>
+    export type StaffControllerCreateMutationBody = BodyType<CreateStaffDto>
+    export type StaffControllerCreateMutationError = ErrorType<unknown>
+
+    export const useStaffControllerCreate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof staffControllerCreate>>, TError,{data: BodyType<CreateStaffDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof staffControllerCreate>>,
+        TError,
+        {data: BodyType<CreateStaffDto>},
+        TContext
+      > => {
+      return useMutation(getStaffControllerCreateMutationOptions(options), queryClient);
+    }
+
+export const getStaffControllerFindOneUrl = (id: string,) => {
+
+
+
+
+  return `/api/staff/${id}`
+}
+
+export const staffControllerFindOne = async (id: string, options?: RequestInit): Promise<StaffResponseDto> => {
+
+  return customFetch<StaffResponseDto>(getStaffControllerFindOneUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStaffControllerFindOneQueryKey = (id: string,) => {
+    return [
+    `/api/staff/${id}`
+    ] as const;
+    }
+
+
+export const getStaffControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof staffControllerFindOne>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStaffControllerFindOneQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof staffControllerFindOne>>> = ({ signal }) => staffControllerFindOne(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StaffControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof staffControllerFindOne>>>
+export type StaffControllerFindOneQueryError = ErrorType<unknown>
+
+
+export function useStaffControllerFindOne<TData = Awaited<ReturnType<typeof staffControllerFindOne>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof staffControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof staffControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStaffControllerFindOne<TData = Awaited<ReturnType<typeof staffControllerFindOne>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof staffControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof staffControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStaffControllerFindOne<TData = Awaited<ReturnType<typeof staffControllerFindOne>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useStaffControllerFindOne<TData = Awaited<ReturnType<typeof staffControllerFindOne>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof staffControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStaffControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getStaffControllerUpdateUrl = (id: string,) => {
+
+
+
+
+  return `/api/staff/${id}`
+}
+
+export const staffControllerUpdate = async (id: string,
+    updateStaffDto: UpdateStaffDto, options?: RequestInit): Promise<StaffResponseDto> => {
+
+  return customFetch<StaffResponseDto>(getStaffControllerUpdateUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateStaffDto)
+  }
+);}
+
+
+
+
+export const getStaffControllerUpdateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof staffControllerUpdate>>, TError,{id: string;data: BodyType<UpdateStaffDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof staffControllerUpdate>>, TError,{id: string;data: BodyType<UpdateStaffDto>}, TContext> => {
+
+const mutationKey = ['staffControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof staffControllerUpdate>>, {id: string;data: BodyType<UpdateStaffDto>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  staffControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StaffControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof staffControllerUpdate>>>
+    export type StaffControllerUpdateMutationBody = BodyType<UpdateStaffDto>
+    export type StaffControllerUpdateMutationError = ErrorType<unknown>
+
+    export const useStaffControllerUpdate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof staffControllerUpdate>>, TError,{id: string;data: BodyType<UpdateStaffDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof staffControllerUpdate>>,
+        TError,
+        {id: string;data: BodyType<UpdateStaffDto>},
+        TContext
+      > => {
+      return useMutation(getStaffControllerUpdateMutationOptions(options), queryClient);
+    }
+
+export const getShiftsControllerFindAllUrl = (params?: ShiftsControllerFindAllParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/shifts?${stringifiedParams}` : `/api/shifts`
+}
+
+export const shiftsControllerFindAll = async (params?: ShiftsControllerFindAllParams, options?: RequestInit): Promise<ShiftListResponseDto> => {
+
+  return customFetch<ShiftListResponseDto>(getShiftsControllerFindAllUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getShiftsControllerFindAllQueryKey = (params?: ShiftsControllerFindAllParams,) => {
+    return [
+    `/api/shifts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getShiftsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError = ErrorType<unknown>>(params?: ShiftsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getShiftsControllerFindAllQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftsControllerFindAll>>> = ({ signal }) => shiftsControllerFindAll(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ShiftsControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof shiftsControllerFindAll>>>
+export type ShiftsControllerFindAllQueryError = ErrorType<unknown>
+
+
+export function useShiftsControllerFindAll<TData = Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError = ErrorType<unknown>>(
+ params: undefined |  ShiftsControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof shiftsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftsControllerFindAll<TData = Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: ShiftsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof shiftsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftsControllerFindAll<TData = Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: ShiftsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useShiftsControllerFindAll<TData = Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: ShiftsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getShiftsControllerFindAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getShiftsControllerCreateUrl = () => {
+
+
+
+
+  return `/api/shifts`
+}
+
+export const shiftsControllerCreate = async (createShiftDto: CreateShiftDto, options?: RequestInit): Promise<ShiftResponseDto> => {
+
+  return customFetch<ShiftResponseDto>(getShiftsControllerCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createShiftDto)
+  }
+);}
+
+
+
+
+export const getShiftsControllerCreateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerCreate>>, TError,{data: BodyType<CreateShiftDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerCreate>>, TError,{data: BodyType<CreateShiftDto>}, TContext> => {
+
+const mutationKey = ['shiftsControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftsControllerCreate>>, {data: BodyType<CreateShiftDto>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  shiftsControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftsControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof shiftsControllerCreate>>>
+    export type ShiftsControllerCreateMutationBody = BodyType<CreateShiftDto>
+    export type ShiftsControllerCreateMutationError = ErrorType<unknown>
+
+    export const useShiftsControllerCreate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerCreate>>, TError,{data: BodyType<CreateShiftDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftsControllerCreate>>,
+        TError,
+        {data: BodyType<CreateShiftDto>},
+        TContext
+      > => {
+      return useMutation(getShiftsControllerCreateMutationOptions(options), queryClient);
+    }
+
+export const getShiftsControllerCopyWeekUrl = () => {
+
+
+
+
+  return `/api/shifts/copy-week`
+}
+
+/**
+ * @summary Bir haftanın vardiyalarını başka bir haftaya kopyalar. Çakışanlar ve pasif personel atlanır.
+ */
+export const shiftsControllerCopyWeek = async (copyWeekDto: CopyWeekDto, options?: RequestInit): Promise<CopyWeekResponseDto> => {
+
+  return customFetch<CopyWeekResponseDto>(getShiftsControllerCopyWeekUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(copyWeekDto)
+  }
+);}
+
+
+
+
+export const getShiftsControllerCopyWeekMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerCopyWeek>>, TError,{data: BodyType<CopyWeekDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerCopyWeek>>, TError,{data: BodyType<CopyWeekDto>}, TContext> => {
+
+const mutationKey = ['shiftsControllerCopyWeek'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftsControllerCopyWeek>>, {data: BodyType<CopyWeekDto>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  shiftsControllerCopyWeek(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftsControllerCopyWeekMutationResult = NonNullable<Awaited<ReturnType<typeof shiftsControllerCopyWeek>>>
+    export type ShiftsControllerCopyWeekMutationBody = BodyType<CopyWeekDto>
+    export type ShiftsControllerCopyWeekMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Bir haftanın vardiyalarını başka bir haftaya kopyalar. Çakışanlar ve pasif personel atlanır.
+ */
+export const useShiftsControllerCopyWeek = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerCopyWeek>>, TError,{data: BodyType<CopyWeekDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftsControllerCopyWeek>>,
+        TError,
+        {data: BodyType<CopyWeekDto>},
+        TContext
+      > => {
+      return useMutation(getShiftsControllerCopyWeekMutationOptions(options), queryClient);
+    }
+
+export const getShiftsControllerUpdateUrl = (id: string,) => {
+
+
+
+
+  return `/api/shifts/${id}`
+}
+
+export const shiftsControllerUpdate = async (id: string,
+    updateShiftDto: UpdateShiftDto, options?: RequestInit): Promise<ShiftResponseDto> => {
+
+  return customFetch<ShiftResponseDto>(getShiftsControllerUpdateUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateShiftDto)
+  }
+);}
+
+
+
+
+export const getShiftsControllerUpdateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerUpdate>>, TError,{id: string;data: BodyType<UpdateShiftDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerUpdate>>, TError,{id: string;data: BodyType<UpdateShiftDto>}, TContext> => {
+
+const mutationKey = ['shiftsControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftsControllerUpdate>>, {id: string;data: BodyType<UpdateShiftDto>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  shiftsControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftsControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof shiftsControllerUpdate>>>
+    export type ShiftsControllerUpdateMutationBody = BodyType<UpdateShiftDto>
+    export type ShiftsControllerUpdateMutationError = ErrorType<unknown>
+
+    export const useShiftsControllerUpdate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerUpdate>>, TError,{id: string;data: BodyType<UpdateShiftDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftsControllerUpdate>>,
+        TError,
+        {id: string;data: BodyType<UpdateShiftDto>},
+        TContext
+      > => {
+      return useMutation(getShiftsControllerUpdateMutationOptions(options), queryClient);
+    }
+
+export const getShiftsControllerRemoveUrl = (id: string,) => {
+
+
+
+
+  return `/api/shifts/${id}`
+}
+
+export const shiftsControllerRemove = async (id: string, options?: RequestInit): Promise<DeleteShiftResponseDto> => {
+
+  return customFetch<DeleteShiftResponseDto>(getShiftsControllerRemoveUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getShiftsControllerRemoveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerRemove>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['shiftsControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftsControllerRemove>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  shiftsControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftsControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof shiftsControllerRemove>>>
+
+    export type ShiftsControllerRemoveMutationError = ErrorType<unknown>
+
+    export const useShiftsControllerRemove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftsControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftsControllerRemove>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getShiftsControllerRemoveMutationOptions(options), queryClient);
+    }
+
+export const getShiftTemplatesControllerFindAllUrl = () => {
+
+
+
+
+  return `/api/shift-templates`
+}
+
+export const shiftTemplatesControllerFindAll = async ( options?: RequestInit): Promise<ShiftTemplateListResponseDto> => {
+
+  return customFetch<ShiftTemplateListResponseDto>(getShiftTemplatesControllerFindAllUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getShiftTemplatesControllerFindAllQueryKey = () => {
+    return [
+    `/api/shift-templates`
+    ] as const;
+    }
+
+
+export const getShiftTemplatesControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getShiftTemplatesControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>> = ({ signal }) => shiftTemplatesControllerFindAll({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ShiftTemplatesControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>>
+export type ShiftTemplatesControllerFindAllQueryError = ErrorType<unknown>
+
+
+export function useShiftTemplatesControllerFindAll<TData = Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftTemplatesControllerFindAll<TData = Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftTemplatesControllerFindAll<TData = Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useShiftTemplatesControllerFindAll<TData = Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftTemplatesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getShiftTemplatesControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getShiftTemplatesControllerCreateUrl = () => {
+
+
+
+
+  return `/api/shift-templates`
+}
+
+export const shiftTemplatesControllerCreate = async (createShiftTemplateDto: CreateShiftTemplateDto, options?: RequestInit): Promise<ShiftTemplateResponseDto> => {
+
+  return customFetch<ShiftTemplateResponseDto>(getShiftTemplatesControllerCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createShiftTemplateDto)
+  }
+);}
+
+
+
+
+export const getShiftTemplatesControllerCreateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerCreate>>, TError,{data: BodyType<CreateShiftTemplateDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerCreate>>, TError,{data: BodyType<CreateShiftTemplateDto>}, TContext> => {
+
+const mutationKey = ['shiftTemplatesControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftTemplatesControllerCreate>>, {data: BodyType<CreateShiftTemplateDto>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  shiftTemplatesControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftTemplatesControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof shiftTemplatesControllerCreate>>>
+    export type ShiftTemplatesControllerCreateMutationBody = BodyType<CreateShiftTemplateDto>
+    export type ShiftTemplatesControllerCreateMutationError = ErrorType<unknown>
+
+    export const useShiftTemplatesControllerCreate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerCreate>>, TError,{data: BodyType<CreateShiftTemplateDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftTemplatesControllerCreate>>,
+        TError,
+        {data: BodyType<CreateShiftTemplateDto>},
+        TContext
+      > => {
+      return useMutation(getShiftTemplatesControllerCreateMutationOptions(options), queryClient);
+    }
+
+export const getShiftTemplatesControllerUpdateUrl = (id: string,) => {
+
+
+
+
+  return `/api/shift-templates/${id}`
+}
+
+export const shiftTemplatesControllerUpdate = async (id: string,
+    updateShiftTemplateDto: UpdateShiftTemplateDto, options?: RequestInit): Promise<ShiftTemplateResponseDto> => {
+
+  return customFetch<ShiftTemplateResponseDto>(getShiftTemplatesControllerUpdateUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateShiftTemplateDto)
+  }
+);}
+
+
+
+
+export const getShiftTemplatesControllerUpdateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerUpdate>>, TError,{id: string;data: BodyType<UpdateShiftTemplateDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerUpdate>>, TError,{id: string;data: BodyType<UpdateShiftTemplateDto>}, TContext> => {
+
+const mutationKey = ['shiftTemplatesControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftTemplatesControllerUpdate>>, {id: string;data: BodyType<UpdateShiftTemplateDto>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  shiftTemplatesControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftTemplatesControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof shiftTemplatesControllerUpdate>>>
+    export type ShiftTemplatesControllerUpdateMutationBody = BodyType<UpdateShiftTemplateDto>
+    export type ShiftTemplatesControllerUpdateMutationError = ErrorType<unknown>
+
+    export const useShiftTemplatesControllerUpdate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerUpdate>>, TError,{id: string;data: BodyType<UpdateShiftTemplateDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftTemplatesControllerUpdate>>,
+        TError,
+        {id: string;data: BodyType<UpdateShiftTemplateDto>},
+        TContext
+      > => {
+      return useMutation(getShiftTemplatesControllerUpdateMutationOptions(options), queryClient);
+    }
+
+export const getShiftTemplatesControllerRemoveUrl = (id: string,) => {
+
+
+
+
+  return `/api/shift-templates/${id}`
+}
+
+export const shiftTemplatesControllerRemove = async (id: string, options?: RequestInit): Promise<DeleteShiftTemplateResponseDto> => {
+
+  return customFetch<DeleteShiftTemplateResponseDto>(getShiftTemplatesControllerRemoveUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getShiftTemplatesControllerRemoveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerRemove>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['shiftTemplatesControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftTemplatesControllerRemove>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  shiftTemplatesControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftTemplatesControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof shiftTemplatesControllerRemove>>>
+
+    export type ShiftTemplatesControllerRemoveMutationError = ErrorType<unknown>
+
+    export const useShiftTemplatesControllerRemove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftTemplatesControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftTemplatesControllerRemove>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getShiftTemplatesControllerRemoveMutationOptions(options), queryClient);
+    }
+
+export const getExpensesControllerFindAllUrl = (params?: ExpensesControllerFindAllParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/expenses?${stringifiedParams}` : `/api/expenses`
+}
+
+export const expensesControllerFindAll = async (params?: ExpensesControllerFindAllParams, options?: RequestInit): Promise<ExpenseListResponseDto> => {
+
+  return customFetch<ExpenseListResponseDto>(getExpensesControllerFindAllUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExpensesControllerFindAllQueryKey = (params?: ExpensesControllerFindAllParams,) => {
+    return [
+    `/api/expenses`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExpensesControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof expensesControllerFindAll>>, TError = ErrorType<unknown>>(params?: ExpensesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExpensesControllerFindAllQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof expensesControllerFindAll>>> = ({ signal }) => expensesControllerFindAll(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof expensesControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ExpensesControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof expensesControllerFindAll>>>
+export type ExpensesControllerFindAllQueryError = ErrorType<unknown>
+
+
+export function useExpensesControllerFindAll<TData = Awaited<ReturnType<typeof expensesControllerFindAll>>, TError = ErrorType<unknown>>(
+ params: undefined |  ExpensesControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof expensesControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof expensesControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExpensesControllerFindAll<TData = Awaited<ReturnType<typeof expensesControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: ExpensesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof expensesControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof expensesControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExpensesControllerFindAll<TData = Awaited<ReturnType<typeof expensesControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: ExpensesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useExpensesControllerFindAll<TData = Awaited<ReturnType<typeof expensesControllerFindAll>>, TError = ErrorType<unknown>>(
+ params?: ExpensesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getExpensesControllerFindAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getExpensesControllerCreateUrl = () => {
+
+
+
+
+  return `/api/expenses`
+}
+
+export const expensesControllerCreate = async (createExpenseDto: CreateExpenseDto, options?: RequestInit): Promise<ExpenseResponseDto> => {
+
+  return customFetch<ExpenseResponseDto>(getExpensesControllerCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createExpenseDto)
+  }
+);}
+
+
+
+
+export const getExpensesControllerCreateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof expensesControllerCreate>>, TError,{data: BodyType<CreateExpenseDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof expensesControllerCreate>>, TError,{data: BodyType<CreateExpenseDto>}, TContext> => {
+
+const mutationKey = ['expensesControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof expensesControllerCreate>>, {data: BodyType<CreateExpenseDto>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  expensesControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExpensesControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof expensesControllerCreate>>>
+    export type ExpensesControllerCreateMutationBody = BodyType<CreateExpenseDto>
+    export type ExpensesControllerCreateMutationError = ErrorType<unknown>
+
+    export const useExpensesControllerCreate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof expensesControllerCreate>>, TError,{data: BodyType<CreateExpenseDto>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof expensesControllerCreate>>,
+        TError,
+        {data: BodyType<CreateExpenseDto>},
+        TContext
+      > => {
+      return useMutation(getExpensesControllerCreateMutationOptions(options), queryClient);
+    }
+
+export const getExpensesControllerSummaryUrl = (params?: ExpensesControllerSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/expenses/summary?${stringifiedParams}` : `/api/expenses/summary`
+}
+
+export const expensesControllerSummary = async (params?: ExpensesControllerSummaryParams, options?: RequestInit): Promise<ExpenseSummaryResponseDto> => {
+
+  return customFetch<ExpenseSummaryResponseDto>(getExpensesControllerSummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExpensesControllerSummaryQueryKey = (params?: ExpensesControllerSummaryParams,) => {
+    return [
+    `/api/expenses/summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExpensesControllerSummaryQueryOptions = <TData = Awaited<ReturnType<typeof expensesControllerSummary>>, TError = ErrorType<unknown>>(params?: ExpensesControllerSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExpensesControllerSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof expensesControllerSummary>>> = ({ signal }) => expensesControllerSummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof expensesControllerSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ExpensesControllerSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof expensesControllerSummary>>>
+export type ExpensesControllerSummaryQueryError = ErrorType<unknown>
+
+
+export function useExpensesControllerSummary<TData = Awaited<ReturnType<typeof expensesControllerSummary>>, TError = ErrorType<unknown>>(
+ params: undefined |  ExpensesControllerSummaryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerSummary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof expensesControllerSummary>>,
+          TError,
+          Awaited<ReturnType<typeof expensesControllerSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExpensesControllerSummary<TData = Awaited<ReturnType<typeof expensesControllerSummary>>, TError = ErrorType<unknown>>(
+ params?: ExpensesControllerSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerSummary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof expensesControllerSummary>>,
+          TError,
+          Awaited<ReturnType<typeof expensesControllerSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExpensesControllerSummary<TData = Awaited<ReturnType<typeof expensesControllerSummary>>, TError = ErrorType<unknown>>(
+ params?: ExpensesControllerSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useExpensesControllerSummary<TData = Awaited<ReturnType<typeof expensesControllerSummary>>, TError = ErrorType<unknown>>(
+ params?: ExpensesControllerSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof expensesControllerSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getExpensesControllerSummaryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getExpensesControllerRemoveUrl = (id: string,) => {
+
+
+
+
+  return `/api/expenses/${id}`
+}
+
+export const expensesControllerRemove = async (id: string, options?: RequestInit): Promise<DeleteExpenseResponseDto> => {
+
+  return customFetch<DeleteExpenseResponseDto>(getExpensesControllerRemoveUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getExpensesControllerRemoveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof expensesControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof expensesControllerRemove>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['expensesControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof expensesControllerRemove>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  expensesControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExpensesControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof expensesControllerRemove>>>
+
+    export type ExpensesControllerRemoveMutationError = ErrorType<unknown>
+
+    export const useExpensesControllerRemove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof expensesControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof expensesControllerRemove>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getExpensesControllerRemoveMutationOptions(options), queryClient);
     }
 

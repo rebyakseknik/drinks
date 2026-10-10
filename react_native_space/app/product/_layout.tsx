@@ -8,6 +8,7 @@ export default function ProductLayout() {
       headerTintColor: COLORS.text,
       headerTitleStyle: { fontWeight: '700' },
     }}>
+      <Stack.Screen name="index" options={{ title: 'Ürünler' }} />
       <Stack.Screen name="new" options={{ title: 'Yeni Ürün' }} />
       <Stack.Screen name="[id]/index" options={{ title: 'Ürün Detay' }} />
       <Stack.Screen name="[id]/edit" options={{ title: 'Ürün Düzenle' }} />

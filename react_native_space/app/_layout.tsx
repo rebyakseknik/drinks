@@ -22,6 +22,9 @@ export default function RootLayout() {
             <Stack.Screen name="closing" options={{ headerShown: false }} />
             <Stack.Screen name="report" options={{ headerShown: false }} />
             <Stack.Screen name="settings" options={{ headerShown: false }} />
+            <Stack.Screen name="staff" options={{ headerShown: false }} />
+            <Stack.Screen name="shift" options={{ headerShown: false }} />
+            <Stack.Screen name="expense" options={{ headerShown: false }} />
           </Stack>
         </AuthProvider>
       </QueryClientProvider>

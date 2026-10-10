@@ -11,6 +11,9 @@ import { ReportsModule } from './reports/reports.module';
 import { SettingsModule } from './settings/settings.module';
 import { UsersModule } from './users/users.module';
 import { InvitesModule } from './invites/invites.module';
+import { StaffModule } from './staff/staff.module';
+import { ShiftsModule } from './shifts/shifts.module';
+import { ExpensesModule } from './expenses/expenses.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { InvitesModule } from './invites/invites.module';
     SettingsModule,
     UsersModule,
     InvitesModule,
+    StaffModule,
+    ShiftsModule,
+    ExpensesModule,
   ],
 })
 export class AppModule {}
